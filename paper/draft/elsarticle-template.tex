@@ -1,0 +1,515 @@
+\documentclass[review, times]{elsarticle}
+
+\usepackage{lineno,hyperref}
+\modulolinenumbers[5]
+
+\journal{Journal of \LaTeX\ Templates}
+
+%%%%%%%%%%%%%%%%%%%%%%%
+%% Elsevier bibliography styles
+%%%%%%%%%%%%%%%%%%%%%%%
+%% To change the style, put a % in front of the second line of the current style and
+%% remove the % from the second line of the style you would like to use.
+%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Numbered
+%\bibliographystyle{model1-num-names}
+
+%% Numbered without titles
+%\bibliographystyle{model1a-num-names}
+
+%% Harvard
+%\bibliographystyle{model2-names.bst}\biboptions{authoryear}
+
+%% Vancouver numbered
+%\usepackage{numcompress}\bibliographystyle{model3-num-names}
+
+%% Vancouver name/year
+%\usepackage{numcompress}\bibliographystyle{model4-names}\biboptions{authoryear}
+
+%% APA style
+%\bibliographystyle{model5-names}\biboptions{authoryear}
+
+%% AMA style
+%\usepackage{numcompress}\bibliographystyle{model6-num-names}
+
+%% `Elsevier LaTeX' style
+\bibliographystyle{elsarticle-num}
+%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% personal packages
+\usepackage{amsmath,amssymb}
+\usepackage{subfig}
+\usepackage{tabu}
+\usepackage{booktabs}
+\usepackage{float}
+
+
+
+% personal macros
+\newtheorem{thm}{Theorem} \newtheorem{lem}[thm]{Lemma} \newdefinition{rmk}{Remark} \newproof{pf}{Proof}
+\newproof{pot}{Proof of Theorem \ref{thm2}}
+
+\newcommand*\diff{\mathop{}\!\mathrm{d}}
+\newcommand*\Diff[1]{\mathop{}\!\mathrm{d^#1}}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{A fast spectral method for inelastic collision operator and the heated granular flow\tnoteref{mytitlenote}}
+% \tnotetext[mytitlenote]{Fully documented templates are available in the elsarticle package on \href{http://www.ctan.org/tex-archive/macros/latex/contrib/elsarticle}{CTAN}.}
+
+%% Group authors per affiliation:
+% \author{Jingwei Hu, Zheng Ma\fnref{myfootnote}}
+% \address{Department of Mathematics, Purdue University, 150 N. University Street, West Lafayette, IN, USA}
+% \fntext[myfootnote]{}
+
+%% or include affiliations in footnotes:
+\author[mymainaddress]{Jingwei Hu}
+\ead{jingweihu@purdue.edu}
+
+\author[mymainaddress]{Zheng Ma}
+% \cortext[mycorrespondingauthor]{Corresponding author}
+\ead{ma531@purdue.edu}
+
+\address[mymainaddress]{150 N. University Street, West Lafayette, IN, USA}
+% \address[mysecondaryaddress]{360 Park Avenue South, New York}
+
+\begin{abstract}
+In this paper, we proposed a fast spectral algorithm of the inelastic operator, with its application to one of the widely used model of granular gases, the heated Enskog-Boltzmann equation. Comparing to the direct spectral method, our fast algorithm reduces the computational complexity from $O\left(N^6\right)$ to $O\left(MN^4\log(N) \right)$ and the storage from $O(N^6)$ to $O\left( MN^4\right)$, where $N$ is the number of discretization points in velocity dimension and $M \ll N^2$ is the number of numerical quadrature points. We test the numerical accuracy and efficiency in both two dimensional and three dimensional cases, where the famous Haff's cooling law is recovered in the 3D example.
+\end{abstract}
+
+% \begin{keyword}
+% \texttt{elsarticle.cls}\sep \LaTeX\sep Elsevier \sep template
+% \MSC[2010] 00-01\sep  99-00
+% \end{keyword}
+
+\end{frontmatter}
+
+\linenumbers
+
+\section{Introduction}
+
+It has been found in the past few decays that the granular gases behave fundamentally different from the usual molecular gases modelled as elastically colliding spheres. The rich phenomenology of such systems, such as the formation of clusters and shear instability, draws a lot of attention from both theoretical and industrial application point of view. Different from their molecular counterparts, granular gases allow inelastic collision, in other words, break the time-reversible symmetry because of the energy dissipation. Despite this dissipative nature and its resulting nontrivial properties, the basic equation of kinetic theory, the Boltzmann equation, can be still extended to describe the granular gases with a different collision operator, namely,
+\begin{equation}
+\partial_t f + v \cdot \nabla_x f = Q_{\text{in}}(f,f),
+\label{boltz}
+\end{equation}
+where $f(t,x,v)$ is the one-particle distribution function depending on the time $t \geq 0$, position $x \in \mathbb{R}^d$ and velocity $v \in \mathbb{R}^d$ with the dimension $d \geq 1$, and $Q_{\text{in}}$ is the so-called inelastic (or granular) collision operator, whose exact expression is presented in later discussions. For convenience, we use $Q$ instead of $Q_{\text{in}}$ in the rest of this paper, whose notation should not be confused with the usual elastic collision operator. Another widely used model, first introduced by van Noije and Ernst \cite{noije}, is the spatial homogeneous inelastic Boltzmann equation based on Enskog-Boltzmann model with a heat source:
+\begin{equation} \label{inBoltz}
+\partial_tf-\varepsilon \Delta_vf=Q(f,f),
+\end{equation}
+where the distribution function $f$ depends only on the time $t$ and velocity $v$, and the term $\varepsilon \Delta_vf$ represents the diffusion effects with the diffusion coefficient $\epsilon \ll 1$, incurred by a heat bath of infinite temperature. 
+
+The numerical difficulty and cost, of course, lie in the computation of the collision operator. At each time step, the construction of the inelastic collision operator requires $O(N^{2d})$ operations and $O(N^{2d})$ storage in a direct numerical scheme. As is pointed out in \cite{filbet2005}, although the loss term in the inelastic collision can be evaluated only in $O(N^d \log N)$ operations thanks to its convolution structure, the cost of the gain part is still rather formidable. A natural question of course remains to reduce the computational cost for the entire collision operator, as well as the numerical storage -- in order words, to fully exploit the structure of the granular collision operator. In this paper, we propose a fast spectral algorithm for the inelastic collision operator, inspired by a sequence of studies on elastic Boltzmann operator \cite{fast1999, mouhot2006fast, hu2012fast, gamba_hu}. To be specific, in contrast to a direct spectral solver, in 3D this algorithm reduces the computational cost from $O(N^{6})$ to $O\left(MN^{4}\log(N)\right)$ and the storage from $O(N^{6})$ to $O(MN^{4})$, where $M \ll N^{2}$ is the number of quadrature points on $\mathbb{S}^{2}$. 
+
+%Dynamics of granular gases has received a lot of attention in the past few decays due to the distinct phenomenology displayed by such systems, with rich applications from the industrial point of view. Different from molecular gases, modelled as elastically colliding spheres, granular gases allow inelastic collision, which in turn implies energy dissipation. As was first pointed out by Goldhirsch and Zanetti in 1993, this dissipative nature is responsible for the nontrivial behaviours, such as formation of clusters and shear instability, comparing to their molecular counterparts. Despite their differences, both gases Fortunately, the basic equation of kinetic theory, the Boltzmann equation, can be easily extended to describe the granular gases.
+
+The rest of the paper is organized as follows: Section 2 provides a brief overview of the inelastic collision operator, and the inelastic Boltzmann equation widely used in practice for the study of granular flow. The numerical algorithms of the inelastic collision operator is present in Section 3. Starting from a naive trial and discussions of its limitations, we henceforth propose a fast spectral method of the operator taking full advantage of its convolution structure in both the two dimensional and three dimensional cases. Finally in Section 4, a number of numerical tests are performed to test both accuracy and efficiency of our fast algorithm in 2D and 3D cases. Also, as can be in the 3D numerical example, the Haff's cooling law is verified.
+
+\section{Inelastic collision operator and its Enskog-Boltzmann equation}
+\subsection{Inelastic collision }
+To describe the inelastic binary collision, a reconstitution coefficient $e$ is introduced. Specifically, assuming two particles with velocities $v$ and $v_*$ are going to collide, after the collision, the velocities denoted by $v'$ and $v_*'$ are given by the so-called $\omega$-representation \cite{Villani2006} 
+\begin{align}\label{omega}
+\left\{
+\begin{array}{l}
+\displaystyle v'=v-\frac{1+e}{2}[(v-v_*)\cdot \omega ]\omega, \\[8pt]
+\displaystyle v_*'=v_*+\frac{1+e}{2}[(v-v_*)\cdot \omega]\omega,
+\end{array}\right.
+\end{align}
+where $\omega \in S^{d-1}$ is the impact direction, and $0 \leq e \leq 1$ is the restitution coefficient (with $e=1$ recovering the elastic case). It follows that
+\begin{equation}
+(v'-v_*')\cdot \omega=-e [(v-v_*)\cdot \omega].
+\end{equation}
+Furthermore, instead of the conservation of both momentum and energy in the usual molecular gases, here one has the conservation of momentum and the loss of energy:
+\begin{equation} \label{lossenergy}
+v'+v_*'=v+v_*; \quad v'^2+v_*'^2=v^2+v_*^2-\frac{1-e^2}{2}[(v-v_*)\cdot \omega]^2.
+\end{equation}
+Now we are ready to define the inelastic collision operator in its weak form
+\begin{equation} \label{col_omega}
+\int Q(f,f)(v)\phi(v)\diff{v}= \frac{1}{2} \int_{\mathbb{R}^d} \int_{\mathbb{R}^d} \int_{\mathbb{S}^{d-1}} B_{\omega}(|g|,|\omega\cdot \hat{g}|)ff_*\left(\phi'+\phi_*'-\phi-\phi_* \right)\diff{\omega} \diff{v} \diff{v_*},
+\end{equation}
+where $g := v - v_\ast$, $\hat{g}$ denotes the unit vector in the direction of $g$, $\phi(t,v)$ a regular test function, $B_{\omega}$ the binary collision kernel in the $\omega$-representation, and we use the shorthands $f$ for $f(t,v)$, $f_\ast$ for $f_\ast(t, v_\ast)$ and so on. This operator clearly has collisional invariants $1$ and $v_i$ ($i = 1, 2, 3$), namely,
+\begin{equation}
+  \int_{\mathbb{R}^3} Q(f, f)(v) \diff v = \int_{\mathbb{R}^3} Q(f,f)(v)v_i\diff v = 0,
+\end{equation}
+where $v_i$ denotes the $i$-th component of the velocity $v$.
+
+Note that \eqref{omega} can be also written in the so-called $\sigma$-representation, where $\sigma$ is related to $\omega$ in the following way:
+\begin{equation} \label{relation}
+(g\cdot \omega)\omega =\frac{1}{2}(g-|g|\sigma), \quad g:=v-v_*.
+\end{equation}
+In $\sigma$-representation, the parametrization (\ref{omega}) becomes
+\begin{align*} 
+\left\{
+\begin{array}{l}
+\displaystyle v'=\frac{v+v_*}{2}+\frac{1-e}{4}(v-v_*)+\frac{1+e}{4}|v-v_*|\sigma, \\[8pt]
+\displaystyle v_*'=\frac{v+v_*}{2}- \frac{1-e}{4}(v-v_*)-\frac{1+e}{4}|v-v_*|\sigma.
+\end{array}\right.
+\end{align*}
+The transformation between $\omega$ and $\sigma$ representations is given as follows:
+\begin{align*}
+& B_{\omega}(|g|, |\omega\cdot \hat{g}|) \diff{\omega} \diff{v_*}  = B_{\sigma}(|g|,\sigma\cdot \hat{g})\diff{\sigma} \diff{v_*}  , \\
+& B_{\omega}(|g|, |\omega\cdot \hat{g}|) =|2(\omega\cdot \hat{g})|^{d-2}B_{\sigma}(|g|,1-2(\omega\cdot\hat{g})^2),
+\end{align*}
+where $B_\sigma$ denotes the collision kernels in $\sigma$-representations. Two common cases to keep in mind are the 2D pseudo (no angular dependence) Maxwell molecule, where $B_{\sigma}=B_{\omega}=1$; and the 3D hard sphere, with $B_{\sigma}=|g|$, $B_{\omega}=2|g\cdot\omega|$. Hereafter, we shall use the collision operator in its $\sigma$-representation
+\begin{equation} \label{col_sigma}
+\int Q(f,f)(v)\phi(v)\diff{v}= \frac{1}{2} \int_{\mathbb{R}^d} \int_{\mathbb{R}^d} \int_{\mathbb{S}^{d-1}}
+B_{\sigma}(|g|,\sigma\cdot \hat{g})ff_*\left(\phi'+\phi_*'-\phi-\phi_* \right)\diff{\sigma}\diff{v}\diff{v_*}.
+\end{equation}
+since its convenience for numerical purposes, which will be discussed with more details later.
+
+\subsection{Inelastic Enskog-Boltzmann equation with heating sources}
+
+Consider the inelastic Boltzmann equation with a heating source \eqref{inBoltz}. We shall revisit a few properties of this equation. First, for a solution $f$ to \eqref{inBoltz}, the conservation of mass and momentum becomes straightfoward taking $\phi = 1$ and $\phi = v$ respectively in \eqref{col_sigma}. In other words,
+\begin{equation}
+\rho := \int f\diff{v}\equiv \rho_0, \quad  u :=\frac{1}{\rho}\int fv \diff{v}\equiv u_0.
+\end{equation}
+where $\rho$ is the density and $u$ the bulk velocity. Similarly, define the kinetic energy as
+\begin{equation}
+  E := \frac{1}{2}\int f |v|^2\diff v
+\end{equation}
+and take $\phi = |v|^2$, one obtains the relation of energy dissipation
+\begin{equation}\label{ki_energy}
+\partial_t E -\varepsilon d\rho_0=-\frac{1-e^2}{16}\iiint B_{\sigma}(|g|,\sigma\cdot \hat{g})|g|^2(1-\sigma\cdot \hat{g})ff_*\diff{\sigma}\diff{v}\diff{v_*},
+\end{equation}
+where we used (\ref{lossenergy}) and (\ref{relation}). Consider the following collision kernel, namely, VHS (variable hard sphere) model
+\begin{equation} \label{kernel}
+B_{\sigma}(|g|,\sigma\cdot \hat{g})=C_{\lambda}|g|^{\lambda}b_{\lambda}(\sigma\cdot \hat{g}),
+\end{equation}
+where $C_{\lambda}$ is some constant and $b_{\lambda}$ is some function. For Maxwell molecule, i.e., $\lambda=0$ in (\ref{kernel}), equation \eqref{ki_energy} becomes
+\begin{equation} 
+\partial_t E -\varepsilon d\rho_0=-\frac{1-e^2}{16}C_0\iiint |g|^{2}b_0(\sigma\cdot \hat{g})(1-\sigma\cdot \hat{g})ff_*\,\diff{\sigma}\,\diff{v}\,\diff{v_*}.
+\end{equation}
+Note that
+\begin{equation}
+\int C_0b_0(\sigma\cdot \hat{g})(1-\sigma\cdot \hat{g})\,\diff{\sigma}
+\end{equation}
+is a constant regardless of $\hat{g}$ and, without loss of generality, is assumed to be $1$. Then
+\begin{align} 
+  \partial_t E -\varepsilon d\rho_0 &=-\frac{1-e^2}{16}\iint |g|^{2}ff_*\,\diff{v}\,\diff{v_*} \notag\\
+   & =-\frac{1-e^2}{16}\iint (v^2+v_*^2-2v\cdot v_*)ff_*\,\diff{v}\,\diff{v_*} \notag \\
+   &=-\frac{1-e^2}{8}\left(2\rho_0E - (\rho_0 u_0)^2\right).
+\end{align}
+
+Finally, the temperature defined by
+\begin{equation}
+  T = \frac{1}{\rho d}\int_{\mathbb{R}^d}f|u - v|^2\diff v
+\end{equation}
+goes to $0$ as time approaches infinity. In particular, if the initial condition is $\rho_0=1$, $u_0=0$, then $T=\frac{2}{d}E$ satisfies
+\begin{equation}
+\partial_t T-2\varepsilon =-\frac{1-e^2}{4}T,
+\end{equation}
+whose solution is
+\begin{equation}\label{soln:T}
+T=\left(T_0-\frac{8\varepsilon}{1-e^2}\right)\exp{\left(-\frac{1-e^2}{4}t\right)}+\frac{8\varepsilon}{1-e^2}.
+\end{equation}
+\begin{rmk}
+This explicit expression serves as the reference quantity for numerical tests, since in inelastic cases it is notably harder to find a special $f$ such that the collision operator has an analytical expression in contrast to elastic cases.
+\end{rmk}
+
+\section{A fast spectral algorithm of the inelastic collision operator}
+
+In this section, we construct the fast spectral algorithm. Before that, let us first revisit the rather conventional spectral method and its direct solver. The idea of the spectral method is rather straightfoward, that is, to exploit the structure of the collision operator in its Fourier space. Specificallly, by choosing the test function $\phi(v)=e^{-i\frac{\pi}{L}k\cdot v}$ in the weak form \eqref{col_sigma}, one can obtain the expression of the $k$-th mode in the Fourier expansion of $Q$:
+\begin{equation} \label{sum1}
+\hat{Q}_k=\sum_{\substack{l,m=-\frac{N}{2}\\l+m=k}}^{\frac{N}{2}-1}G(l,m)\hat{f}_l\hat{f}_m,
+\end{equation} 
+where the weight $G(l,m)$ is given by
+\begin{equation*}  \label{G}
+G(l,m)=\int_{\mathbb{R}^d}e^{-i\frac{\pi}{L}m \cdot g}\left[\int_{S^{d-1}}B_{\sigma}(|g|,\sigma\cdot \hat{g})\left(e^{-i\frac{\pi}{L}\frac{1+e}{4}(l+m)\cdot (|g|\sigma-g)}-1\right)\diff{\sigma}\right]\diff{g},
+\end{equation*}
+here $g$ needs to be truncated properly as was done for the elastic case \cite{gamba_hu}. 
+
+For the three-dimensional VHS model \eqref{kernel}, it follows by a straightfoward calculation that the formula for $G$ reduces to
+\begin{equation} \label{direct_G}
+  G(l,m)=16\pi^2C_{\gamma}\int_0^R \rho^{\gamma+2}\left[\text{Sinc}\left(\frac{\pi}{L}\left|\frac{1+e}{4}(l+m)-m\right|\rho\right)\text{Sinc}\left(\frac{\pi}{L}\frac{1+e}{4}|l+m|\rho\right)-\text{Sinc}\left(\frac{\pi}{L}\rho|m|\right)\right]\diff\rho.
+\end{equation}
+Hence, one can construct a direct spectral solver by evaluating the numerical quadrature of \eqref{direct_G} and proceed the summation of \eqref{sum1}. However, as is mentioned before, this approach results in a high computational cost of $O(N^6)$ and storage of $O(N^6)$, apparently because there is no convolution structure in the summation to follow. In applications, the scale of problems that one can compute using this approach may become quickly bottlenecked due to the computational limitations, which motivates the study of a fast spectral algorithm. 
+
+We begin this exploration by asking ourselves whether there are any underlying convolution structures to be unveiled. While it becomes unclear once using the final analytical expression \eqref{direct_G} of $G(l,m)$, there are in fact hidden convolution structures in equation \eqref{G}, namely, to consider a partial numerical quadrature of this intermidiate form instead of integrating it analytically. In particular, the idea of our fast algorithm is to separate the weight $G$ as $G(l,m)\approx\sum_{t=1}^T\alpha_t(l+m)\beta_t(m)$ using quadrature rules.
+
+\subsection{2D case}
+
+In 2D VHS  case $B_{\sigma}(|g|,\sigma\cdot \hat{g})=C_{\gamma}|g|^{\gamma}$:
+\begin{equation}
+  \int_{S^1}B_{\sigma}(|g|,\sigma\cdot \hat{g})\left(e^{-i\frac{\pi}{L}\frac{1+e}{4}(l+m)\cdot (|g|\sigma-g)}-1\right)\diff{\sigma}=2\pi C_{\gamma}|g|^{\gamma}\left[ e^{i\frac{\pi}{L}\frac{1+e}{4}(l+m)\cdot g}\text{J}_0\left(\frac{\pi}{L}\frac{1+e}{4}|l+m||g|\right)-1\right],
+\end{equation}
+then,
+\begin{equation}
+  G(l,m)=\sum_{\rho,\sigma}w_{\rho}w_{\sigma}2\pi C_{\gamma}\rho^{\gamma+1}e^{-i\frac{\pi}{L}\rho m \cdot \sigma}\left[ e^{i\frac{\pi}{L}\frac{1+e}{4}\rho (l+m)\cdot \sigma}\text{J}_0\left(\frac{\pi}{L}\frac{1+e}{4}|l+m|\rho\right)-1\right],
+\end{equation}
+where $w_\rho$ and $w_\sigma$ are the weights of quadratures for $\rho$ and $\sigma$ respectively. $J_0$ is $0$-th order Bessel function. Therefore,
+\begin{equation} 
+  \hat{Q}_k=\sum_{\rho,\sigma}w_{\rho}w_{\sigma}2\pi C_{\gamma}\rho^{\gamma+1}\left[ e^{i\frac{\pi}{L}\frac{1+e}{4}\rho k\cdot \sigma}\text{J}_0\left(\frac{\pi}{L}\frac{1+e}{4}\rho |k|\right)-1\right]\sum_{\substack{l,m=-\frac{N}{2}\\l+m=k}}^{\frac{N}{2}-1}\hat{f}_l \left[e^{-i\frac{\pi}{L}\rho m \cdot \sigma}\hat{f}_m\right],
+\end{equation} 
+or the loss term can be computed separately as
+\begin{equation} 
+\hat{Q}_k^-=\sum_{\rho,\sigma}w_{\rho}w_{\sigma}2\pi C_{\gamma}\rho^{\gamma+1}\sum_{\substack{l,m=-\frac{N}{2}\\l+m=k}}^{\frac{N}{2}-1}\hat{f}_l \left[e^{-i\frac{\pi}{L}\rho m \cdot \sigma}\hat{f}_m\right]=\sum_{\rho}w_{\rho}4\pi^2 C_{\gamma}\rho^{\gamma+1}\sum_{\substack{l,m=-\frac{N}{2}\\l+m=k}}^{\frac{N}{2}-1}\hat{f}_l \left[\text{J}_0\left(\frac{\pi}{L}\rho |m|\right)\hat{f}_m\right].
+\end{equation}
+We refer the later method as ``separate'' method and previous one as ``full'' method correspondingly.
+
+\subsection{3D case}
+
+In 3D VHS case $B_{\sigma}(|g|,\sigma\cdot \hat{g})=C_{\gamma}|g|^{\gamma}$:
+\begin{equation}
+\int_{S^2}B_{\sigma}(|g|,\sigma\cdot \hat{g})\left(e^{-i\frac{\pi}{L}\frac{1+e}{4}(l+m)\cdot (|g|\sigma-g)}-1\right)\,\diff{\sigma}=4\pi C_{\gamma}|g|^{\gamma}\left[ e^{i\frac{\pi}{L}\frac{1+e}{4}(l+m)\cdot g}\text{Sinc}\left(\frac{\pi}{L}\frac{1+e}{4}|l+m||g|\right)-1\right],
+\end{equation}
+then,
+\begin{equation}
+G(l,m)=\sum_{\rho,\sigma}w_{\rho}w_{\sigma}4\pi C_{\gamma}\rho^{\gamma+2}e^{-i\frac{\pi}{L}\rho m \cdot \sigma}\left[ e^{i\frac{\pi}{L}\frac{1+e}{4}\rho (l+m)\cdot \sigma}\text{Sinc}\left(\frac{\pi}{L}\frac{1+e}{4}|l+m|\rho\right)-1\right],
+\end{equation}
+therefore,
+\begin{equation} 
+\hat{Q}_k=\sum_{\rho,\sigma}w_{\rho}w_{\sigma}4\pi C_{\gamma}\rho^{\gamma+2}\left[ e^{i\frac{\pi}{L}\frac{1+e}{4}\rho k\cdot \sigma}\text{Sinc}\left(\frac{\pi}{L}\frac{1+e}{4}\rho |k|\right)-1\right]\sum_{\substack{l,m=-\frac{N}{2}\\l+m=k}}^{\frac{N}{2}-1}\hat{f}_l \left[e^{-i\frac{\pi}{L}\rho m \cdot \sigma}\hat{f}_m\right],
+\end{equation} 
+or the loss term can be computed separately as
+\begin{equation} 
+\hat{Q}_k^-=\sum_{\rho,\sigma}w_{\rho}w_{\sigma}4\pi C_{\gamma}\rho^{\gamma+2}\sum_{\substack{l,m=-\frac{N}{2}\\l+m=k}}^{\frac{N}{2}-1}\hat{f}_l \left[e^{-i\frac{\pi}{L}\rho m \cdot \sigma}\hat{f}_m\right]=\sum_{\rho}w_{\rho}16\pi^2 C_{\gamma}\rho^{\gamma+2}\sum_{\substack{l,m=-\frac{N}{2}\\l+m=k}}^{\frac{N}{2}-1}\hat{f}_l \left[\text{Sinc}\left(\frac{\pi}{L}\rho |m|\right)\hat{f}_m\right],
+\end{equation}
+which are the ``full" and ``separate" methods in 3D case.
+
+\begin{rmk}
+	In our numerical implementation, we use the Gauss-Legendre quadrature in the radial direction $\rho$, while for the integration in $\sigma$ we propose to use the spherical design in 3D case which is the near optimal quadrature on the sphere and requires fewer quadrature points than tensor product based Gauss quadratures for a large class of functions (2D case is easy to treat by using traditional quadratures). To gain a better idea of how this quadrature works, a error test of this quadrature will be given in next section.
+\end{rmk}
+
+\section{Numerical examples}
+
+In this section, we first verify the accuracy and efficiency of the proposed method with extensive numerical studies in two dimensional cases, and then provide three dimensional numerical results as well. Note that unlike the elastic case where the analytical results of the collision kernel are accessible by choosing a suitable function $f$, the inelastic case, however, only has the analytical formula for its macro quantities, such as the temperature $T$ as is shown in \eqref{soln:T}. This means in order to provide a trustworthy verification of our solver, one needs a numerical scheme to solve the inelastic Boltzmann equation \eqref{inBoltz}.
+
+
+In the following numerical simulations, we use our fast spectral solver to evaluate the collision operator, paired with a standard fourier spectral method to treat the diffusion term $\varepsilon\Delta f$ and the SSP-RK3 (the 3rd order Strong Stability-Preserving Runge-Kutta method) \cite{shuTadmor} for time discretizations.
+
+\subsection{Maxwell molecules - 2D example 1}
+
+In this part, we perform several 2D examples to verify the accuracy and efficiency of our method. We consider equation \eqref{inBoltz} with $\varepsilon = 10^{-6}$ and Maxwell molecule, i.e., $\lambda = 0$. The initial condition for $f$ is given as the the 2D BKW solution
+\begin{equation} \label{ext1}
+  f(0,v) = \frac{1}{2\pi K^2}\exp\left(-\frac{v^2}{2K}\right)\left(2K-1+\frac{1-K}{2K}v^2\right),
+\end{equation}
+where $K=1-\exp(-1/16)/2$. One can easily check that $\rho_0 = 1$, $u_0 = 0$ and $T_0 = E_0$ in this case.
+
+The macro quantity we compute is temperature $T$ at some given final time $T_\text{final}$. The numercial result $T_\text{num}$ is obtained by taking the moments of the numerical solution $f_\text{num}$, which is computed by RK3 and our fast spectral method with $N = 64$ and $M = 30$. The reference solution $T_\text{ref}$ is obtained by using the exact form \eqref{soln:T}. Finally, the error is measured by $|T_\text{num} - T_\text{ref}|$.
+
+% (\ref{ext1}) satisfies exactly the spatially homogeneous Boltzmann equation
+% \begin{equation} \label{homo}
+%   \frac{\partial f}{\partial t} = \mathcal{Q}(f),
+% \end{equation}
+
+\paragraph{\bf Convergence in time} In order to suppress the error due to time discretization, we first perform a convergence test of 3rd Runge-Kutta SSP method used in the simulation:
+\begin{align}
+  k_1 &= L(f^n), \notag \\
+  k_2 &= L(f^n + \frac{1}{2}k_1\Delta t), \notag \\
+  k_3 &= L(f^n - k_1\Delta t + 2k_2\Delta t), \notag \\
+  f^{n+1} &= f^n + \frac{1}{6}(k_1 + 4k_2 + k_3)\Delta t,
+\end{align}
+where $L$ is spatial discretization.
+
+% \begin{figure}[htb]
+%   \centering
+%   \includegraphics[width = .48\linewidth]{figs/sep/dt_2d_bkw_e=02}\hfill
+%   \includegraphics[width = .48\linewidth]{figs/full/dt_2d_bkw_e_full=02}
+%   \caption{Convergence of RK3 with $e = 0.2$. Left: separate. Right: full.}
+%   \label{dt_bkw_e02}
+% \end{figure}
+% \begin{figure}[htb]
+%   \centering
+%   \includegraphics[width=0.5\textwidth]{figs/sep/dt_2d_bkw_e=05}\hfill
+%   \includegraphics[width=0.5\textwidth]{figs/full/dt_2d_bkw_e_full=05}
+%   \caption{Convergence of RK3 with $e = 0.5$. Left: separate. Right: full.}
+%   \label{dt_bkw_e05}
+% \end{figure}
+% \begin{figure}[htb]
+%   \centering
+%   \includegraphics[width=0.5\textwidth]{figs/sep/dt_2d_bkw_e=08}\hfill
+%   \includegraphics[width=0.5\textwidth]{figs/full/dt_2d_bkw_e_full=08}
+%   \caption{Convergence of RK3 with $e = 0.8$. Left: separate. Right: full.}
+%   \label{dt_bkw_e08}
+% \end{figure}
+
+\begin{figure}[H]
+  \centering
+  \subfloat[$e = 0.2$, separate]{\includegraphics[width = 0.5\linewidth]{figs/sep/dt_2d_bkw_e=02}}\hfill
+  \subfloat[$e = 0.2$, full]{\includegraphics[width = 0.5\linewidth]{figs/full/dt_2d_bkw_e_full=02}} \\
+  \subfloat[$e = 0.5$, separate]{\includegraphics[width = 0.5\linewidth]{figs/sep/dt_2d_bkw_e=05}}\hfill
+  \subfloat[$e = 0.5$, full]{\includegraphics[width = 0.5\linewidth]{figs/full/dt_2d_bkw_e_full=05}} \\
+  \subfloat[$e = 0.8$, separate]{\includegraphics[width = 0.5\linewidth]{figs/sep/dt_2d_bkw_e=08}}\hfill
+  \subfloat[$e = 0.8$, full]{\includegraphics[width = 0.5\linewidth]{figs/full/dt_2d_bkw_e_full=08}}
+  \caption{Convergence test in time of the 2D example 1 with $N = 32$ for various values of $e=0.2$, $e=0.5$ and $e=0.8$.}
+  \label{dt_conv_1}
+\end{figure}
+
+In Figure~\ref{dt_conv_1} we plot the relation between the errors versus different $\Delta t$s for $e = 0.2, 0.5$ and $0.8$, $T_\text{final}=2$. A third order convergence rate can be seen very easily. Since in this test we fix all the parameters in our spectral method as $\Delta t$ changes, these figures also imply that the error of the spectral method computing the collision is really small, or at least around $O(10^{-9})$.
+
+This test shows that our RK3 method in time direction is indeed 3rd-order and in the following convergence tests of $N$ we will set $\Delta t = 0.01$
+
+\paragraph{\bf Convergence in $N$} We then perform the convergence test of the spectral method. As mentioned previously we set $\Delta t = 0.01$ and $M = 30$, also $T_\text{final} = 2$. As $N$ increases from $8$ to $128$, we calculate the error for different $e$s using both ``separate" and ``full" method as shown in Table~\ref{table 1}.
+
+\begin{table}[H]
+  \centering
+  \subfloat[$e = 0.2$]{
+  \begin{tabu} to 0.6\linewidth {X[1, c] X[3, c] X[3, c]}
+    \toprule
+    $N$ & Separate & Full \\
+    \midrule
+    8 & 9.21116565e-01 & 9.21116565e-01 \\
+    16 & 1.27634481e-02 & 1.27640374e-02 \\
+    32 & 6.79544555e-06 & 6.79745658e-06 \\
+    64 & 2.34851361e-10 & 2.36438646e-10 \\
+    128 & 6.30565600e-11 & 6.13890050e-11 \\
+    \bottomrule
+  \end{tabu}
+  } \\
+  \subfloat[$e = 0.5$]{
+  \begin{tabu} to 0.6\linewidth {X[1, c] X[3, c] X[3, c]}
+    \toprule
+    $N$ & Separate & Full \\
+    \midrule
+    8 & 7.98706096e-01 & 7.98706096e-01 \\
+    16 & 6.42641236e-03 & 6.42644165e-03 \\
+    32 & 4.55713801e-06 & 4.55730861e-06 \\
+    64 & 4.93595165e-11 & 4.93770580e-11 \\
+    128 & 3.13873372e-11 & 3.14279713e-11 \\
+    \bottomrule
+  \end{tabu}
+  } \\
+  \subfloat[$e = 0.8$]{
+  \begin{tabu} to 0.6\linewidth {X[1, c] X[3, c] X[3, c]}
+    \toprule
+    $N$ & Separate & Full \\
+    \midrule
+    8 & 5.52666966e-01 & 5.52666966e-01 \\
+    16 & 4.88821204e-04 & 4.88586534e-04 \\
+    32 & 1.14430393e-07 & 1.13897201e-07 \\
+    64 & 9.82359749e-11 & 9.82520731e-11 \\
+    128 & 1.00099595e-10 & 1.00117470e-10 \\
+    \bottomrule
+  \end{tabu}
+  }
+  \caption{Convergence test in $N$ of the 2D example 1 with $\Delta t = 0.01$ for various values of $e=0.2$, $e=0.5$ and $e=0.8$.}
+  \label{table 1}
+\end{table}
+
+These results show that our method indeed can achieve spectral accuracy.
+
+\subsection{Maxwell molecules - 2D example 2}
+
+Follow the set up in previous subsection, we change the initial condition from 2D BKW solution to a exponential double-well function
+\begin{equation}
+  f(0, v) = \frac{0.8}{\pi}\left(e^{-4|v-2|^2} + e^{-|v+0.5|^2}\right).
+\end{equation}
+
+Again both tests of convergence in time and $N$ are performed and the results are shown in the following Figure~\ref{conv_dt_2} and Table~\ref{table 2}.
+
+\begin{figure}[H]
+  \centering
+  \subfloat[$e = 0.2$, separate]{\includegraphics[width = 0.5\linewidth]{figs/sep/dt_2d_e=02}} \\
+  \subfloat[$e = 0.5$, separate]{\includegraphics[width = 0.5\linewidth]{figs/sep/dt_2d_e=05}} \\
+  \subfloat[$e = 0.8$, separate]{\includegraphics[width = 0.5\linewidth]{figs/sep/dt_2d_e=08}}
+  \caption{Convergence test in time of the 2D example 2 with $N = 32$ for various values of $e=0.2$, $e=0.5$ and $e=0.8$.}
+  \label{conv_dt_2}
+\end{figure}
+
+\begin{table}[H]
+  \centering
+  \subfloat[$e = 0.2$]{
+  \begin{tabu} to 0.6\linewidth {X[1, c] X[3, c] X[3, c]}
+    \toprule
+    $N$ & Separate & Full \\
+    \midrule
+    8 & 1.25303916e-01 & 1.25303916e-01 \\
+    16 & 1.41601818e-02 & 1.42811856e-02 \\
+    32 & 1.21162093e-04 & 8.50383206e-05 \\
+    64 & 8.65618628e-08 & 5.75217760e-05 \\
+    128 & 2.64749862e-08 & 5.74603408e-05 \\
+    \bottomrule
+  \end{tabu}
+  } \\
+  \subfloat[$e = 0.5$]{
+  \begin{tabu} to 0.6\linewidth {X[1, c] X[3, c] X[3, c]}
+    \toprule
+    $N$ & Separate & Full \\
+    \midrule
+    8 & 9.06935081e-02 & 9.06935081e-02 \\
+    16 & 2.06153352e-02 & 2.07345865e-02 \\
+    32 & 1.08598123e-04 & 7.68575010e-05 \\
+    64 & 3.61540865e-08 & 4.58166915e-05 \\
+    128 & 4.84827622e-09 & 4.57852460e-05 \\
+    \bottomrule
+  \end{tabu}
+  } \\
+  \subfloat[$e = 0.8$]{
+  \begin{tabu} to 0.6\linewidth {X[1, c] X[3, c] X[3, c]}
+    \toprule
+    $N$ & Separate & Full \\
+    \midrule
+    8 & 4.21932177e-02 & 4.21932177e-02 \\
+    16 & 2.19257970e-02 & 2.17989934e-02 \\
+    32 & 1.25546782e-04 & 1.17000137e-04 \\
+    64 & 1.55334599e-08 & 2.42867607e-05 \\
+    128 &  5.91159477e-09 & 2.42767854e-05 \\
+    \bottomrule
+  \end{tabu}
+  }
+  \caption{Convergence test in $N$ of the 2D example 2 with $\Delta t = 0.01$ for various values of $e=0.2$, $e=0.5$ and $e=0.8$.}
+  \label{table 2}
+\end{table}
+
+One can find the error becomes worse compared to BKW initial condition, especially for the ``full'' method (see Table~\ref{table 2}). This is also why no time convergence test for ``full'' method is done for this example.
+
+\subsection{3D example}
+
+For 3D examples, we first test the accuracy of spherical design. In order to do this we still consider the Maxwell molecules. After this we will verify the physical Haff's cooling law by considering a hard sphere molecule.
+
+
+\paragraph{\bf Accuracy of spherical design}
+Consider the collision kernel $B = \frac{1}{4\pi}$ is a constant and take the initial condition as
+\begin{equation}\label{3Dbkw}
+  f(t_0, v) = \frac{1}{2(2\pi K(t_0))^{3/2}}\exp\left(\frac{v^2}{2K(t_0)}\right)\left(\frac{5K(t_0)-3}{K(t_0}+\frac{1-K(t_0)}{K^2(t_0)}v^2\right),
+\end{equation}
+where $K(t) = 1 - \exp(-t_0/6)$ and we take $t_0 = 6.5$.
+
+We set $e=0.2$ and $T_\text{final} = 1$, $\Delta t = 0.01$ with $N = 32$. By comparing the numerical temperature with analytical expression for different spherical design points, we obtain the following Table~\ref{sph_design}
+
+\begin{table}[H]
+  \centering
+  \begin{tabu} to 0.8\linewidth {X[1,c] X[2,c]}
+    \toprule
+    Spherical Design & $e = 0.2$ \\
+    \midrule
+    6 & 0.0013957739849754791 \\
+    12 & 9.9706271716293315e-05 \\
+    32 & 2.2499901350947482e-06 \\
+    48 & 2.4272557155313734e-06 \\
+    70 & 2.4703481364962698e-06 \\
+    94 & 2.4703481364962698e-06 \\
+    120 & 2.453380453903975e-06 \\
+    \bottomrule
+  \end{tabu}
+  \caption{Errrors of spherical design.}
+  \label{sph_design}
+\end{table}
+
+\paragraph{\bf Haff's cooling law - hard sphere molecule}
+In this example, we try to observe the famous Haff's cooling law \cite{haff1983}. In the first stage of the evolution from a flux-free spatial uniform state, the granular gases remain homogeneous. This stage is called the homogeneous cooling state, in which the granular temperature follows Haff's law, first derived by Haff in 1983 \cite{haff1983, oxfordbook}, in which the temperature decays in the order of $t^{-2}$.
+In this test, we use the same example as in the previous subsection, but for hard sphere molecules. That is, consider the collision kernel
+\begin{equation}
+  B = \frac{1}{4\pi}|g| = \frac{1}{4\pi}|v-v_\ast|.
+\end{equation}
+with the reconstitution coefficient $ e = 0.2$. The initial datum is chosen as \eqref{3Dbkw}, and we compute till the final time $T_\text{final} = 3$ with numerical discretizations $\Delta t = 0.01$ and $N = 32$.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width = .8\linewidth]{figs/Haff's_cooling}
+  \caption{Haff's cooling law}
+  \label{Haff_cooling}
+\end{figure}
+As can be seen in Figure~\ref{Haff_cooling}, our numerical temperature decays as 
+$$ T(t) = \frac{2.25}{ (1+0.36t)^2},$$
+which agrees exactly with the Haff's formula $$T(t) = \frac{T_0}{(1+C_0 t)^2}.$$
+
+
+\section*{References}
+
+\bibliography{mybibfile}
+
+\end{document}
