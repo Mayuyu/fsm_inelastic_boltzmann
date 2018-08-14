@@ -18,6 +18,13 @@ class FastSpectralCollison3D:
         # spherical points and weight
         sigma = np.loadtxt(char)
         self.s_w = 4*pi/sigma.shape[0]
+        # integral on unit sphere using quadrature
+        theta, w_theta = np.polynomial.legendre.leggauss(M_sigma[0])
+        theta = 0.5*(theta + 1)*2*pi
+        w_theta = 0.5*2*pi*w_theta
+        phi, w_phi = np.polynomial.legendre.leggauss(M_sigma[1])
+        phi = 0.5*(phi + 1)*pi
+        w_phi = 0.5*pi*w_phi
         # index
         k = np.fft.fftshift(np.arange(-N/2,N/2))
         # dot with index

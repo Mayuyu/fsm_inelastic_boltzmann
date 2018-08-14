@@ -8,6 +8,7 @@ from math import pi
 class FastSpectralCollison2D:
     
     def __init__(self, e, gamma, L, N, R, N_R, M=8):
+        gamma, self.e = config.physical_config.gamma, config.physical_config.e
         # legendre quadrature
         x, w = np.polynomial.legendre.leggauss(N_R)
         r = 0.5*(x + 1)*R
