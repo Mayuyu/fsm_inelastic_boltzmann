@@ -8,9 +8,9 @@
         "N_g": 30,
         "N_sigma": 32,
         "method": "spherical_design",
-        "sigma": "../src/sphere_design/ss007.00032.txt",
-        "N_theta": 4,
-        "N_phi": 8
+        "sigma": "../src/sphere_design/ss015.00120.txt",
+        "N_theta": 10,
+        "N_phi": 10
     },
     "physical_config": {
         "gamma": 0,
