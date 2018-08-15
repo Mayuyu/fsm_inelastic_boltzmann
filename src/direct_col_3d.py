@@ -32,6 +32,32 @@ class DirectCol3D(object):
 
         self._fftw_plan()
 
+    @property
+    def dv(self):
+        if self._dv is None:
+            self._dv = 2*self._L/self._N
+        return self._dv
+
+    @property
+    def v(self):
+        if self._v is None:
+            self._v = np.arange(-self._L + self.dv/2, self._L+self.dv/2, self.dv)
+        return self._v
+    
+    @property
+    def v_norm(self):
+        if self._v_norm is None:
+            self._v_norm = (self.v**2)[:,None,None] + (self.v**2)[:,None] + self.v**2
+        return self._v_norm
+
+    @property
+    def N(self):
+        return self._N
+
+    @property
+    def e(self):
+        return self._e
+
     def _G(self, k, m):
         x, w = np.polynomial.legendre.leggauss(self._N_R)
         r = 0.5*(x + 1)*self._R
