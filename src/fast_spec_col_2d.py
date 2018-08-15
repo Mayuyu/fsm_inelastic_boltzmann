@@ -5,8 +5,7 @@ import pyfftw
 from scipy import special
 from math import pi
 
-class FastSpectralCollison2D:
-    
+class FastSpectralCollison2D(object):
     def __init__(self, config, e=None, N=None):
         # import parameters from config file
         self._gamma = config.physical_config.gamma

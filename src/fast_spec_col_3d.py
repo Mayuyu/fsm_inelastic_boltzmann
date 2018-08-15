@@ -5,8 +5,9 @@ import pyfftw
 from math import pi
 from utility import sinc
 
-class FastSpectralCollison3D:    
+class FastSpectralCollison3D(object):    
     def __init__(self, config, e=None, N=None):
+        self._config = config
         self._gamma = config.physical_config.gamma
         if e is None:
             self._e = config.physical_config.e
@@ -22,8 +23,8 @@ class FastSpectralCollison3D:
             self._N = N
 
         self._N_R = config.quadrature_config.N_g
-        self._sigma = np.loadtxt(config.quadrature_config.sigma)
-
+        self._method = config.quadrature_config.method
+        
         self._dv = None
         self._v = None
         self._v_norm = None
@@ -31,7 +32,6 @@ class FastSpectralCollison3D:
         self._precompute()
         self._fftw_plan()
 
-    
     @property
     def dv(self):
         if self._dv is None:
@@ -71,7 +71,7 @@ class FastSpectralCollison3D:
         # fft of f
         f_hat = self._fft3(f)
         # convolution and quadrature
-        Q = self._s_w*np.sum(self._r_w*(self._F_k_gain - self._F_k_loss)
+        Q = np.sum(self._r_w*self._s_w[:,None]*(self._F_k_gain - self._F_k_loss)
                             *self._fft5(self._ifft5(self._exp*f_hat[...,None,None])*f[...,None,None]),axis=(-1, -2))
         return np.real(self._ifft3(Q))
     
@@ -79,7 +79,7 @@ class FastSpectralCollison3D:
         # fft of f
         f_hat = self._fft3(f)
         # gain term
-        Q_gain = self._s_w*np.sum(self._r_w*self._F_k_gain
+        Q_gain = np.sum(self._s_w[:,None]*self._r_w*self._F_k_gain
                                  *self._fft5(self._ifft5(self._exp*f_hat[...,None,None])*f[...,None,None]),axis=(-1, -2))
         # loss term
         Q_loss = 4*pi*np.sum(self._r_w*self._F_k_loss
@@ -113,15 +113,25 @@ class FastSpectralCollison3D:
         x, w = np.polynomial.legendre.leggauss(self._N_R)
         r = 0.5*(x + 1)*self._R
         self._r_w = 0.5*self._R*w
+        if self._method == "spherical_design":
         # spherical points and weight
-        self._s_w = 4*pi/self._sigma.shape[0]
-        # integral on unit sphere using quadrature
-        # theta, w_theta = np.polynomial.legendre.leggauss(M_sigma[0])
-        # theta = 0.5*(theta + 1)*2*pi
-        # w_theta = 0.5*2*pi*w_theta
-        # phi, w_phi = np.polynomial.legendre.leggauss(M_sigma[1])
-        # phi = 0.5*(phi + 1)*pi
-        # w_phi = 0.5*pi*w_phi
+            self._sigma = np.loadtxt(self._config.quadrature_config.sigma)
+            self._s_w = 4*pi/self._sigma.shape[0]*np.ones(self._sigma.shape[0])
+        else:
+            self._N_theta = self._config.quadrature_config.N_theta
+            self._N_phi = self._config.quadrature_config.N_phi
+            # integral on unit sphere using quadrature
+            theta, w_theta = np.polynomial.legendre.leggauss(self._N_theta)
+            theta = 0.5*(theta + 1)*pi
+            w_theta = 0.5*pi*w_theta
+            phi, w_phi = np.polynomial.legendre.leggauss(self._N_phi)
+            phi = 0.5*(phi + 1)*2*pi
+            w_phi = 0.5*2*pi*w_phi
+            self._sigma = np.zeros((self._N_theta*self._N_phi, 3))
+            self._sigma[:,0] =(np.sin(theta)[:,None]*np.cos(phi)).flatten()
+            self._sigma[:,1] = (np.sin(theta)[:,None]*np.sin(phi)).flatten()
+            self._sigma[:,2] = (np.cos(theta)[:,None]*np.ones(self._N_phi)).flatten()
+            self._s_w = ((np.sin(theta)*w_theta)[:,None]*w_phi).flatten()
         # index
         k = np.fft.fftshift(np.arange(-self._N/2, self._N/2))
         # dot with index
