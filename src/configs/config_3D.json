@@ -1,0 +1,16 @@
+{
+    "domain_config": {
+        "S": 3.5,
+        "L": "0.5*(3 + np.sqrt(2))*S",
+        "N": 64
+    },
+    "quadrature_config": {
+        "N_g": 30,
+        "N_sigma": 32,
+        "sigma": "../src/sphere_design/ss007.00032.txt"
+    },
+    "physical_config": {
+        "gamma": 0,
+        "e": 1
+    }
+}

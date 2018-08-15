@@ -1,3 +1,5 @@
+import numpy as np
+import matplotlib.pyplot as plt
 # ===================================================================
 # Utility functions for different time marching schemes
 # ===================================================================
@@ -27,17 +29,12 @@ def RK4(f, L, eps, dt):
 # ===================================================================
 
 # Plotting 2d function f
-def plot_2d(f, cs):
-    N = f.shape[0]
-    dv = 2*L/N
-    v = np.mgrid[-L+dv/2:L+dv/2:dv,-L+dv/2:L+dv/2:dv]
-    v_norm = v[0]**2 + v[1]**2
-
+def plot_2d(f, v, cs):
+    xv, yv = np.meshgrid(v, v)
     fig, ax = plt.subplots()
-    cs = ax.contour(v[0], v[1], f)
+    cs = ax.contour(xv, yv, f)
     if cs == 1:
-        ax.clabel(cs, inline=0.5)
-        
+        ax.clabel(cs, inline=0.5)   
     ax.grid(linestyle=':')
 
     plt.show()
@@ -99,3 +96,7 @@ def get_config(config_path):
     # convert dict to object recursively for easy call
     config = DictionaryUtility.to_object(config)
     return config
+    
+EPS = 1e-8
+def sinc(x):
+    return np.sin(x+EPS)/(x+EPS)
