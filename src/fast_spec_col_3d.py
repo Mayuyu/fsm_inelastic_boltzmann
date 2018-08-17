@@ -93,7 +93,7 @@ class FastSpectralCollison3D(object):
         # ifft
         f = self._ifft3(f_hat)
         # convolution and quadrature
-        Q = self._s_w*np.sum(self._r_w*(self._F_k_gain - self._F_k_loss)
+        Q = np.sum(self._s_w[:,None]*self._r_w*(self._F_k_gain - self._F_k_loss)
                             *self._fft5(self._ifft5(self._exp*f_hat[...,None,None])*f[...,None,None]),axis=(-1, -2))
         return Q/(4*pi) + eps*self._lapl*f_hat
     
@@ -101,7 +101,7 @@ class FastSpectralCollison3D(object):
         # ifft of f
         f = self._ifft3(f_hat)
         # gain term
-        Q_gain = self._s_w*np.sum(self._r_w*self._F_k_gain
+        Q_gain = np.sum(self._s_w[:,None]*self._r_w*self._F_k_gain
                                  *self._fft5(self._ifft5(self._exp*f_hat[...,None,None])*f[...,None,None]),axis=(-1, -2))
         # loss term
         Q_loss = 4*pi*np.sum(self._r_w*self._F_k_loss

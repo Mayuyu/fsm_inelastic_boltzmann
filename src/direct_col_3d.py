@@ -66,8 +66,14 @@ class DirectCol3D(object):
         k_m_norm = np.sqrt(km[:,None,None,:,None,None]**2 + km[:,None,None,:,None]**2 + km[:,None,None,:]**2)
         m_norm = np.sqrt(m[:,None,None]**2 + m[:,None]**2 + m**2)
         k_norm = np.sqrt(k[:,None,None]**2 + k[:,None]**2 + k**2)
-        return 16*pi**2*np.sum(r_w*r**(self._gamma+2)*(sinc(pi*k_m_norm[...,None]*r/self._L)*sinc(pi*0.25*(1+self._e)*k_norm[...,None,None,None,None]*r/self._L) 
-            - sinc(pi*m_norm[...,None]*r/self._L)), axis = (-1))
+        Glm = 0
+        for r_i, r_w_i in zip(r, r_w):
+            Glm += 16*pi**2*r_w_i*r_i**(self._gamma+2)*(sinc(pi*k_m_norm*r_i/self._L)*sinc(pi*0.25*(1+self._e)*k_norm[...,None,None,None]*r_i/self._L) 
+            - sinc(pi*m_norm*r_i/self._L))
+        
+        return Glm
+#         return 16*pi**2*np.sum(r_w*r**(self._gamma+2)*(sinc(pi*k_m_norm[...,None]*r/self._L)*sinc(pi*0.25*(1+self._e)*k_norm[...,None,None,None,None]*r/self._L) 
+#             - sinc(pi*m_norm[...,None]*r/self._L)), axis = (-1))
 
     def _lm(self):
         l, m = [], []
@@ -95,7 +101,7 @@ class DirectCol3D(object):
         Glm = np.zeros((N, N, N, N, N, N))
         Glm = self._G(k, k)
         l, m = self._lm()
-        np.savez(path, Glm=Glm, l=l, m=m)
+        np.savez(path, Glm=Glm, l=l, m=m, e=self._e, L=self._L, N=self._N, N_R=self._N_R)
         
     def get_Glm_from_file(self, path):
         array = np.load(path)
