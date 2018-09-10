@@ -1,0 +1,69 @@
+\documentclass[11pt]{article}
+\usepackage{latexsym}
+\usepackage{amssymb,amsbsy,amsmath,amsfonts,amssymb,amscd}
+\usepackage{mathrsfs}
+\usepackage{epsfig, graphicx}
+
+
+\setlength{\oddsidemargin}{0mm} \setlength{\evensidemargin}{0mm}
+\setlength{\topmargin}{5mm} \setlength{\textheight}{22cm}
+\setlength{\textwidth}{17cm}
+\renewcommand{\baselinestretch}{1.0}
+\parindent 10pt
+
+\usepackage[margin=1.0in]{geometry}
+
+
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{cases}
+\usepackage{xcolor}
+
+\newcommand{\jh}[1]{\textcolor{red}{JH: #1}}
+\newcommand{\mz}[1]{\textcolor{blue}{MZ: #1}}
+
+
+\begin{document}
+
+\title{Revision of manuscript JCOMP-D-18-00770  ``A fast spectral method for the inelastic Boltzmann collision operator and application to heated granular gases''}
+\author{Jingwei Hu\footnote{Department of Mathematics, Purdue University, West Lafayette, IN 47907, USA (jingweihu@purdue.edu).}, \  \  
+	    Zheng Ma\footnote{Department of Mathematics, Purdue University, West Lafayette, IN 47907, USA (ma531@purdue.edu).}
+           }      
+	\maketitle
+
+\noindent{Dear Editor,}\\
+
+In addition to the Response to Reviewers, we think it is beneficial to address specifically the questions that you raised earlier in the revision stage. We would be happy to provide additional details if needed. Thank you for your time and consideration.
+
+\bigskip
+Let us begin by stating that we believe we already gave a fair description of our contribution and the related work [16] in the original version of the paper (there was no mistake or inaccurate statement). In the revised version, we have expanded a bit by providing more details which hopefully will give readers a better idea. Below we further elaborate on these.
+
+\bigskip
+1 ``{\it How does this contribution compare with [16]? Please describe the assumptions and applicability of the algorithms in [16] accurately.}"
+
+First of all, the two methods are based on different representations of the collision operator. Our method is based on the so-called $\sigma$-representation, while the method in [16] is based on the Carleman representation. Simply speaking, these are two different coordinate systems to represent the collision integral which upon truncation of the domain and discretization (the variables discretized are of course different in two methods) would result in different approximations of the original collision operator. 
+
+Second, the Carleman representation as used in [16] follows an earlier paper ([17] in the revised version) and only readily works for 2D Maxwell molecules and 3D hard spheres as in these two cases the collision kernel is in a separable form so that the resulting sum is a convolution and FFT can be applied. To treat other kernels, [16] modifies the kernel directly to a decoupled form by introducing additional parameters and then determines the values by parameter fitting. The error introduced in this procedure is not clear. The key advantage of our method is that, by using a different representation/discretization, the method requires no assumption on the collision kernel and applies directly to the general form.
+
+Third, we propose to use the {\it spherical design} which is the optimal quadrature on the sphere up to date. In contrast, [16] used the standard tensor product based Gauss quadrature whose accuracy and convergence properties are not comparable to the former.
+
+\bigskip
+2 ``{\it What is the novelty of this paper, in regards to [16] and related work? The claim that the algorithm reduces the cost from $O(N^6)$ is misleading since in fact [16] has a computational cost comparable to the proposed algorithm. This should be correctly reflected in the abstract and introduction.}
+
+The novelty of our method has been explained in the previous question. We did point out in the Introduction of the paper that the method [16] has the same order of complexity as ours. However, it should be noted that our method is based on the $\sigma$-representation of the collision operator. This is the one used in the original, direct spectral method [11]. Our fast strategy allows us to accelerate the direct method significantly. Therefore, we can do a clear comparison of the direct and fast methods in terms of the accuracy and efficiency (see Table 4 and Figure 2). The method in [16] does not have a direct, accurate version to compare with. Hence, it is hard to do a careful validation. In fact, in [16], only the macroscopic quantities such as the temperature was quantitatively checked (convergence and accuracy test) and was only done for the 2D Maxwell molecules. 
+
+
+
+\bigskip
+3 ``{\it Please address Reviewer 2's ``Critique" section in details.}
+
+This part is included in our Response to Reviewers.
+
+
+\end{document}

@@ -37,40 +37,43 @@
            }      
 	\maketitle
 
-\noindent {We would like to thank the anonymous reviewers for their valuable suggestions and comments, which greatly help us improve the quality and clarity of the manuscript. In the following, {\bf Q} denote the questions or suggestions raised by the reviewers, and {\bf A} refer to our answers. }
+\noindent {We would like to thank the Reviewers for their valuable suggestions and comments, which greatly help us improve the quality and clarity of the manuscript. In the following, {\bf Q} denote the questions/comments raised by the Reviewers, and {\bf A} refer to our answers. }
 
 \vspace{0.3in}
 \centerline{{\large \bf{Response to Reviewer \#1}}}
 \bigskip
 
+In the revised manuscript, all changes in response to Reviewer \#1 have been highlighted in \textcolor{blue}{Blue}. Below is a detailed response to each comment.
+
 \begin{itemize}
 \item[{\bf Q1}]  {\it Around lines 53 and 54, the authors mentioned that ``the method by Wu et al. only works for 2D Maxwell molecules and 3D hard sphere...". This is absolutely not true as clearly stated in Ref. 16 (see the paragraph after Eq. 22) that the spectral method can handle the Enskog collision term with a general form of collision kernels, which has been demonstrated by the numerical results for hard-sphere, Maxwell, and soft-potential molecules in Fig. 2 therein.}
 
-\item[{\bf A1}] \mz{The ``direct'' or ``standard'' spectral method indeed can handle general form of collision kernels. However, the method by Wu et al., namely the proposed FAST spectral method based on Carleman representation CANNOT work for general collision kernels. We already checked that paper and believe that, only in the case $B(|x|, |y|)$ is a SEPARABLE funtion of $|x|$, $|y|$, the proposed method will work (all the examples shown in that paper are in $B(|x|, |y|) = |x|^a |y|^b$ this form). Of course one can argue that you can use this separable function to APPROXIMATE ``general'' collision kernel, however, we suspect this is good for $B(|x|, |y|)$ being an arbitrary function. On the contrary, our fast method does not have this constrain since we do not reply on Carleman representation and can work for ``TRUE'' general collision kernel without any appoximation of it.}
+\item[{\bf A1}] In our original manuscript, we wrote ``the method by Wu et al. only {READILY} works for 2D Maxwell .... To deal with other types of interactions, additional modification of the kernel or parameter fitting is necessary, as was done in [17]." We never said that the method cannot treat more general kernels. It can be modified to do so based on parameter fitting. But we do want to mention that this additional modification/fitting introduces an error that is hard to quantify. Our method, on the other hand, is based on a different representation and can directly apply to general kernel without any approximation of it.
+
+%\mz{The ``direct'' or ``standard'' spectral method indeed can handle general form of collision kernels. However, the method by Wu et al., namely the proposed FAST spectral method based on Carleman representation CANNOT work for general collision kernels. We already checked that paper and believe that, only in the case $B(|x|, |y|)$ is a SEPARABLE funtion of $|x|$, $|y|$, the proposed method will work (all the examples shown in that paper are in $B(|x|, |y|) = |x|^a |y|^b$ this form). Of course one can argue that you can use this separable function to APPROXIMATE ``general'' collision kernel, however, we suspect this is good for $B(|x|, |y|)$ being an arbitrary function. On the contrary, our fast method does not have this constrain since we do not reply on Carleman representation and can work for ``TRUE'' general collision kernel without any appoximation of it.}
 
 \item[{\bf Q2}] {\it In lines 60 and 61, evidence on the advantage of `spherical design' over `Gauss quadrature' should be provided.}
 
-\item[{\bf A2}]  \jh{Add a comparsion} \mz{New numercial test is added to illustrate this conclusion, see Table~8.}
+\item[{\bf A2}] The optimal performance of the spherical design can be found in reference [24]. For better illustration, a comparison of the {\it spherical design} v.s. {\it Gauss quadrature} is provided in the revised version, see Tables 7 and 8, where one can see that using roughly the same number of quadrature points on the sphere, the former provides better accuracy and convergence than the latter.
 
 \item[{\bf Q3}] {\it G in Eq. 40 is calculated ``exactly," while the gain term is approximated by quadrature. This may violate the mass conservation. This problem may be removed by calculating G using the same quadrature rule as for the gain term.
 }
 
-\item[{\bf A3}] \mz{We have explanations for this at line 130 and Section 4. The conservation can be achieved using other approachn (e.g., adding a correction step).}
+\item[{\bf A3}] This is a valid point. In fact, we have checked both versions in our numerical tests. The conclusion we obtained is that computing both terms separately provides better accuracy, even in capturing the macroscopic quantities such as the temperature (see in particular Table 2). Some explanations are given at the end of Section 4.1. We also would like to point out that the spectral method itself (without any additional approximation) cannot preserve the moments except the mass. Therefore, if the conservation (in the inelastic case, only mass and momentum are conserved) is strictly required, one can do a correction step [12] as post processing.
+
 
 \item[{\bf Q4}] {\it In Fig. 2 when comparing the direct method to the Fourier spectral method, the software, computer configurations, number of CPU cores used, etc. should be specified.  }
 
-\item[{\bf A4}] \mz{Added accordingly, see Fig. 2}
+\item[{\bf A4}] These are provided now in Table 5.
 
 
 \item[{\bf Q5}] {\it The accuracy of the proposed Fourier spectral method is proved in spatially homogeneous relaxation problems. The paper is a little bit short. I think at least one spatially-inhomogeneous problem should be simulated to test the stability of the present method because some deterministic numerical method fails to solve this problem although they can solve spatially homogeneous relaxation problems. }
 
-\item[{\bf A5}] \mz{This is no reason that this method will fail for spatially in-homogeneous problem......}
+\item[{\bf A5}] We have carefully validated our solver in both 2D and 3D for the spatially homogeneous case. In fact, more tests are provided in the revised version. We believe the solver should work well in the inhomogeneous case. If there exist such examples that the deterministic method fails due to the instability of the homogeneous part, we would be happy to know the details.
 
 \item[{\bf Q6}] {\it The extendibility of the present method to deal with the Enskog collision term where the binary collision is not spatially localized need to be commented in order the compare the fast spectral method developed in Ref. 16. }
 
-\item[{\bf A6}] \mz{...}
-
-
+\item[{\bf A6}] Mathematically, the Enskog equation is not justified. It is more of a phenomenological model used for engineering purpose. Also there exist many different versions of the Enskog equation in the literature. For these reasons, we chose not to discuss the Enskog equation to avoid ambiguities. On the other hand, our method readily generalizes to the Enskog model discussed in [16], since there the spatial variable only plays the role as a parameter. 
 \end{itemize}
 
 
@@ -80,85 +83,90 @@
 \centerline{{\large \bf{Response to Reviewer \#2}}}
 \bigskip
 
-{\bf Critque.} {\it In the reviewer opinion, this work is not a true novelty, because it arrives more than three years after the fast spectral method for the Wu et al. paper [16] (which was in itself a refinement of a paper from the same group about multiple species Boltzmann equation). This method is almost the same than the one introduced in the manuscript, and the reviewer hardly sees then the relevance of such a work, in particular for possible publication in JCP, journal which ``focuses on the computational aspects of physical problems. The scope of the Journal is the presentation of new significantly improved techniques for the numerical solution of problems in all areas of physics." The present manuscript hardly fits in this scope, especially given the fact that the numerical simulations presented are only space homogeneous.
+
+{\bf Critique.} {\it In the reviewer opinion, this work is not a true novelty, because it arrives more than three years after the fast spectral method for the Wu et al. paper [16] (which was in itself a refinement of a paper from the same group about multiple species Boltzmann equation). This method is almost the same than the one introduced in the manuscript, and the reviewer hardly sees then the relevance of such a work, in particular for possible publication in JCP, journal which ``focuses on the computational aspects of physical problems. The scope of the Journal is the presentation of new significantly improved techniques for the numerical solution of problems in all areas of physics." The present manuscript hardly fits in this scope, especially given the fact that the numerical simulations presented are only space homogeneous.
 
 Concerning the overall paper, the most important point for the reviewer is that the authors doesn't compare their methods with the one introduced in [16]. Comparing with the Classical Spectral Method from [11] is nice, and gives strong confidence regarding convergence of the new method, but concerning the accuracy and the computational times, [16] would be more relevant. Moreover, the reviewer thinks that, even if the derivation is different between here and [16], in the constant restitution coefficient case, both methods are the same (this fact is even almost said by the authors p. 4, l. 50). In that regards, the paper would gain a lot of interest to the reviewer if numerical simulations for the non-constant restitution coefficient-case were available.
 }
 
-First of all, this reviewer's comment ``This method is almost the same than the one introduced in the manuscript" is absolutely not true! The method in [16] is based on the so-called Carleman representation of the collision operator. This representation is first used in Mouhot and Pareschi (2006) to derive a fast Fourier method for the classical (elastic) Boltzmann collision operator and is in fact the basis of the method proposed in [16]. Our method is based on the $\sigma$-representation of the collision operator. The two representations are equivalent at the continuous level. However, they become quite different when numerical approximation is applied, for example, the truncation of the integral is done on different variables, in our method, it is $g=v-v_*$, the relative velocity is truncated, while in [16], it is $x=(|g|\sigma-g)/2$ and $y=-g-x$ are truncated; furthermore, our numerical quadrature is applied on $g$, while in [16], it is $x$ that is discretized. These will of course result in different approximations of the collision operator. Another difference is that, our method makes no assumptions on the collision kernel and applies to the general form $B_{\sigma}(|g|,\sigma\cdot \hat{g})$. The method in [16], although can treat general kernels, is based on a modification of the kernel so that it is in the separable form. In view of this, our method does not need any special treatment/approximation of the kernel and is much easier to implement. Moreover, we propose to use the sophisticated quadrature, spherical design, on the sphere, in contrast to the tensor product based Gauss quadrature in [16], which results in much better accuracy as demonstrated in our paper.
+{\bf Our response.} First of all, this reviewer's comment ``This method is almost the same than the one introduced in the manuscript" is absolutely not true. The method in [16] is based on the so-called Carleman representation of the collision operator, which is first used in [17] (citation number in the revised version) to derive a fast spectral method for the classical (elastic) Boltzmann collision operator and is in fact the basis of the method in [16]. Our method is based on the $\sigma$-representation of the collision operator. The two representations are equivalent at the continuous level. However, they become quite different when numerical approximation is applied, for example, the truncation of the integral is done on different variables, in our method, it is $g=v-v_*$, the relative velocity that is truncated, while in [16], it is $x=(|g|\sigma-g)/2$ and $y=-g-x$ that are truncated; furthermore, our numerical quadrature is applied to $g$, while in [16], it is $x$ that is discretized. These will of course result in different approximations of the collision operator. Another key difference is that, by using the $\sigma$-representation our method requires no assumption on the collision kernel and applies directly to the general form $B_{\sigma}(|g|,\sigma\cdot \hat{g})$. The method in [16], although can treat general kernels, is based on a modification of the kernel so that it is in the separable form, hence FFT can be used to accelerate the computation. The error introduced in this procedure is not clear. Moreover, we propose to use the sophisticated quadrature {\it spherical design} on the sphere, in contrast to the tensor product based Gauss quadrature in [16]. The former provides much better accuracy as demonstrated in our paper. Last but not least, we tested carefully the ``full" and ``separated" approaches and observed that the ``separated" approximation can actually yield much better results even when capturing the moments (we in fact leverage the smoothing property of the gain term). The method in [16] discretizes the gain and loss terms simultaneously and the accuracy of doing them separately has never been evaluated.
 
-\jh{Our method provides better accuracy compared to that in [16], do the same numerical test in Section 4.1 of [16] ($10^{-8}$ v.s. $10^{-5}$). I think [16] does not contain a CPU time, please double check (\mz{Confirmed, at least not comparable}).}
+Regarding the comparison, since our method directly accelerates the original spectral method in [11], it makes a lot of sense to compare the accuracy and efficiency of these two methods. As mentioned already, the method in [16] is based on a different approximation than ours (even the criteria of the truncation of the computational domain are different), hence we don't see a fair way to compare them directly. Furthermore, careful numerical validation (convergence test with respect to different discretization parameters) in [16] is quite limited except for one example of 2D Maxwell molecules, neither the CPU time is provided, which make it very hard to do the comparison.  
 
-The reviewer's comment ``even if the derivation is different between here and [16], in the constant restitution coefficient case, both methods are the same (this fact is even almost said by the authors p. 4, l. 50)" is absolutely wrong as already explained in the previous paragraph. Both methods are different no matter $e$ is a constant or not. The statement in page 4, line 50 concerns the difference between the Boltzmann and Enskog operators and it is by no means related to the numerical methods!
+%\jh{Our method provides better accuracy compared to that in [16], do the same numerical test in Section 4.1 of [16] ($10^{-8}$ v.s. $10^{-5}$). I think [16] does not contain a CPU time, please double check (\mz{Confirmed, at least not comparable}).}
 
+The reviewer's comment ``even if the derivation is different between here and [16], in the constant restitution coefficient case, both methods are the same (this fact is even almost said by the authors p. 4, l. 50)" is absolutely wrong as already explained above. The two methods are different no matter $e$ is a constant or not. The statement on page 4, line 50 concerns the difference between the Boltzmann and Enskog operators and has nothing to do with the numerical methods. 
+
+
+\bigskip
+In the revised manuscript, all changes in response to Reviewer \#2 have been highlighted in \textcolor{red}{Red}. Below is a detailed response to each comment.
 
 \begin{itemize}
 
 \item[{\bf Q1}] {\it P. 4 l. 70 the reviewer is surprised of the term ``ambiguity" used for the strong form of the collision operator. The series of papers by eg Mischler, Mouhot et al. (JSP 2006 part 1 and 2, CMP 2009, DCDS A 2009) eg Alonso, Lods et al. (CMS 2011, CMP 2013 and SIMA 2015) asserts this expression quite clearly. More work on this topic is needed.}
 
-\item[{\bf A1}] The weak form of the inelastic collision operator is never of an issue and is consistent in the literature. However, one can find different strong forms from various sources and it is because of this reason, in [19], the authors (in particular, J. A. Carrillo is among the first few people to study the mathematical properties of the inelastic Boltzmann equation) spent a few pages clarifying this issue. This part of presentation in our paper is a shorter version and serves as a starting point of the discussion of the inelastic operator.
+\item[{\bf A1}] The weak form of the inelastic collision operator is never of an issue and is consistent in the literature. However, one can find different strong forms from various sources especially for the case of non-constant restitution coefficient and it is because of this reason, in [20], the authors (in particular, J. A. Carrillo is among the first few people to study the mathematical properties of the inelastic Boltzmann equation) spent a few pages clarifying this issue. This part of presentation in our paper is a shorter version and serves as a starting point of the discussion of the inelastic operator.
 
 \item[{\bf Q2}] {\it On p. 7, before (18), the reviewer would like to note that in the inelastic settings, the particles are macroscopic bodies (pollen, meteoroids, beads, ...) and not perfect molecules. This is the reason of the inelasticity of the collision, and as such, the collision kernel should be only of hard sphere type! The variable hard sphere kernel is not intended for granular gases, only molecular ones.}
 
-\item[{\bf A2}] We agree that the physically relevant case is the hard sphere molecules but for theoretical purpose and numerical validation, other types of molecules, for example the Maxwell molecules, are also useful. In fact, the reference [16] also considers the variable hard sphere kernel (see Section 4.1 in their paper).
+\item[{\bf A2}] We agree that the physically relevant case is the hard sphere molecules but for theoretical purpose and numerical validation, other types of molecules, for example, the Maxwell molecules, are also useful. In fact, the reference [16] also considers the variable hard sphere kernel (see Section 4.1 in their paper).
 
 \item[{\bf Q3}] {\it On p. 9, the computation of the temperature for the constant kernel is done, but the authors could also give some ideas of where the Haff's law comes from (in particular the value of the coefficient $C_0$ in the simulations).
 }
 
-\item[{\bf A3}] $C_0=1/(4\pi)$ as mentioned at the bottom of page 21.
+\item[{\bf A3}] This is described in many books on granular materials and requires several levels of approximations, see for example Section 4.1 in [27].
 
 
 \item[{\bf Q4}] {\it On p. 10, a reference about the fact that it suffices to take R = 2S would be needed, because that doesn't seems that easy for the reviewer. Same goes for the value of L latter in this page, because the inelastic case is slightly different on this regard that the elastic one.}
 
-\item[{\bf A4}] \jh{Refer to [11] or briefly add the discussion to the paper.}
+\item[{\bf A4}] This can be seen from the strong form (6) of the collision operator and is discussed clearly in [11]. As the argument is quite standard, we chose not to repeat the details. It is also worth to mention that the choice of the computational domain in the Carleman representation is determined differently and a larger $L$ is required.
 
 \item[{\bf Q5}] {\it When one deals with Fast Spectral methods, reference to the seminal paper of Mouhot and Pareschi, Math. Comp. 2005, would be necessary (for example on p. 11, before (36)).}
 
-\item[{\bf A5}] \jh{Mention that this is a different method....}
+\item[{\bf A5}] Our method starts from the $\sigma$-representation and the fast spectral method in Mouhot and Pareschi ([17] in the revised version) is based on Carleman representation. Since two methods follow different approximations, it would cause confusion to mention [17] in the description of our method. We have added it to the Introduction part when discussing the method in [16].
 
 
 \item[{\bf Q6}] {\it The reviewer doesn't understand AT ALL the assertion at the end of p. 11 saying that the ``integrand in (39) is oscillatory on the scale of $O(N)$". What does that means? More details (a lot !) are needed here!}
 
-\item[{\bf A6}] 
+\item[{\bf A6}] The integrand in (39) contains a complex exponential whose exponent varies on the order of $N$ (the magnitude of $m$ is $\sim O(N)$). According to the well-known Shannon-Nyquist sampling theorem, one needs at least $N$ points to approximate an oscillatory function like this.
 
 \item[{\bf Q7}] {\it On p. 12, expressions for the weight $w_{\rho}$ and $w_g$ are missing, as well as more details on the underlying numerical methods used here!}
 
-\item[{\bf A7}] \mz{They are just standard Gauss-Legendre quardrature weights which are included in any numerical textbook.}
+\item[{\bf A7}] They are just standard Gauss-Legendre quadrature points and weights that can be found in many textbooks on numerical analysis.
 
 \item[{\bf Q8}] {\it On the same page, l. 125, some more explication on the numerical complexity is needed, because the order of magnitudes are not the same than in the introduction section. The same goes for the storage requirement: numerical experiments showing that the new method is better on that regard than the classical one is needed.
 }
 
-\item[{\bf A8}] 
+\item[{\bf A8}] We don't think there is any inconsistency in the discussion of the numerical complexity and storage requirement.
 
 \item[{\bf Q9}] {\it What about the conservations properties of the new scheme? Are there any numerical simulations available?
 }
 
-\item[{\bf A9}] The Fourier spectral method does not have the conservation. We did not check the mass and momentum but the extensive results presented regarding the temperature demonstrate that the method can capture the moments fairly accurately. 
-
+\item[{\bf A9}] It is known that the Fourier spectral method does not have the conservation. We did not check specifically on mass and momentum but extensive results presented regarding the temperature demonstrate that the method can capture the moments fairly accurately. 
 
 \item[{\bf Q10}] {\it Have the authors tried to take $e=1$ namely the elastic case, in order to see if the BKW solution is obtained?
 }
 
-\item[{\bf A10}] \jh{Maybe include it in Section 4.1.1 as this is quite easy \mz{Of course we checked our code can recover the elastic case otherwise it means our code is wrong....}.}
-
+\item[{\bf A10}] We obviously checked this case. It is also clear from the derivation that the method reduces automatically to the elastic collision solver that was already considered in [14].
 
 \item[{\bf Q11}] {\it On p. 14, using spectral to compute the laplacian is nice, but what is the effect on the aliasing properties? Should one needs to change the truncation? this should be studied too, because the Laplace operator spreads in velocity, whereas Q concentrates, and the analysis on R and S is then broken.
 
 }
 
-\item[{\bf A11}] \mz{This is a good question. But since it is just a heating bath with a very small $\varepsilon = 10^{-6}$ in our test, we believe, at least numerical results show that we do not need to change the truncation.}
+\item[{\bf A11}] We have chosen a relatively large computational domain $L\approx 2.2 S$, where $S$ is the compact support of the function. In addition, the diffusion parameter $\varepsilon$ is very small ($10^{-6}$), hence the domain should be safe. The fact that numerical errors of our method when comparing with the analytical temperature exhibit spectral decay (see Table 2 for example) is a clear evidence.
+
+%\mz{This is a good question. But since it is just a heating bath with a very small $\varepsilon = 10^{-6}$ in our test, we believe, at least numerical results show that we do not need to change the truncation.}
 
 
 \item[{\bf Q12}] {\it On pp. 15-16, more explanations would be nice regarding the discrepancies between the decoupling approach in 2D and 3D. Moreover, [24] is not the good reference for the smoothing properties of the gain term, because this paper concerns only the elastic case. References toward on of the Mischler paper would be better (and the smoothing properties are by the way quite difference in the inelastic case).
 }
 
-\item[{\bf A12}] \jh{There is no rigorous proof except the numerical evidence. However, we do believe this is attributed to the smoothing property of the gain term. Cite the paper ``Cooling Process for Inelastic Boltzmann Equations for Hard Spheres, Part II: Self-Similar Solutions and Tail Behavior" by Mischler and Mouhot for the first regularity proof of the gain term of the inelastic collision operator. In fact, it is mentioned in this paper the regularity result is similar to the elastic case and the proof follows the lines in the elastic case.... See the discussion in Section 1.6 of that paper.}
+\item[{\bf A12}] There is no rigorous proof except the numerical evidence. However, we do believe this is attributed to the smoothing property of the gain term (one can check the accuracy of the gain and loss terms separately and will see that the same discretization applied to the loss term would result in more error). We have cited the paper by Mischler and Mouhot ([26]) for the smoothing effect of the inelastic operator. In fact, it is mentioned in this paper the regularity result is similar to the elastic case and the proof follows the lines there, see the discussion in Section 1.6 of [26].
 
 
 \item[{\bf Q13}] {\it On p. 5, l. 85, the expression for $(,*)$ would improve the readability, as well as the one of J in (7).}
 
-\item[{\bf A13}] \jh{I guess what he means is to give explicitly the formulas for $\tilde{v}$, $\tilde{v}_*$ and $J$. We can do this but need to mention that this is only possible when $e$ is a constant.}
-
+\item[{\bf A13}] These formulas can be given explicitly only for the case of constant restitution coefficient. Since our method works for general $e$ (which does not have to be constant), we chose not to provide them to avoid ambiguity. 
 
 \item[{\bf Q14}] {\it On p. 6, it seems to the reviewer that it is usually easier to derive the strong form of Q, start- ing from its weak form, rather than the contrary (due to the irreversible microscopic collision dynamics).}
 
@@ -167,7 +175,7 @@ The reviewer's comment ``even if the derivation is different between here and [1
 
 \item[{\bf Q15}] {\it Why does the author decide in the numerical section to use the BKW initial conditions? This has no physical relevancy in the inelastic case (and too much symmetries).}
 
-\item[{\bf A15}] We considered the BKW solution in Section 4.1.1 as a starting example mainly because it is an isotropic solution and becomes an exact solution when $e=1$. Later in Section 4.1.2 we did consider an anisotropic solution (see equation (50)) and observed quite different behavior. \mz{We have added an anisotropic solution case in 3D, see the new subsection~4.2.2.}\jh{Why didn't we consider an anisotropic solution in 3D?}
+\item[{\bf A15}] We considered the BKW solution in Section 4.1.1 as a starting example mainly because it is an isotropic solution and becomes an exact solution when $e=1$. Later in Section 4.1.2 we did consider an anisotropic solution (see equation (50)) and observed quite different behavior. In the revised version, we have also added the anisotropic solutions in 3D, see both sections 4.2.2 and 4.2.3.
 
 
 

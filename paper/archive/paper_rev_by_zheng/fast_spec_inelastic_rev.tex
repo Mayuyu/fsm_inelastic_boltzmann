@@ -118,7 +118,7 @@ In spite of the wide engineering and industrial applications of granular gases, 
 
 {\bf Our contribution.} In this paper, we propose a simple fast algorithm for the inelastic Boltzmann collision operator. The method is based on the same framework as the direct Fourier spectral method \cite{FPT05}. By exploiting the low rank and convolutional structure in the collision integral, we are able to reduce the computational cost from $O(N^{2d})$ to $O(MN^{d+1}\log N)$, where $M \ll N^{d-1}$ is the number of quadrature points used on the unit circle (in 2D) or sphere (in 3D). No precomputation is needed for the variable hard sphere model (a commonly used collision kernel including Maxwell molecules and hard spheres as subcases), and only $O(MN^{d+1})$ memory is required to store precomputed weights for more general kernels. The idea is largely inspired by the recent work \cite{GHHH17}, where instead of precomputing all the weights we approximate them partially ``on the fly" using a quadrature rule. We carefully validate the accuracy and efficiency of the proposed method using a series of examples. In particular, we find that separate approximation of the gain and loss terms of the collision operator yields better accuracy compared to approximating them as a whole, although the latter seems quite natural starting from the weak formulation of the equation; we also numerically verify the famous Haff's cooling law for 3D inelastic hard spheres, which says that the temperature in a granular gas decays like $O(t^{-2})$ with time, as predicted in Haff's seminal work \cite{Haff83}.
 
-{\bf Related work.} A closely related work is the fast Fourier spectral method introduced in \cite{WZR15} for the generalized Enskog equation (the Boltzmann and Enskog collision operators reduce to the same thing in the spatially homogeneous case). This method is based on a different representation of the collision operator, the so-called Carleman form, and relies on an extra approximation of the integral in the radial direction. As a result, the final computational cost is comparable to our method. However, we point out that the method in \cite{WZR15} only readily works for 2D Maxwell molecules and 3D hard spheres \textcolor{red}{as in these two cases the collision kernel is in a separable form so that the resulting sum is a convolution and the fast Fourier transform can be applied (see \cite{MP06} where the Carleman form was first used in the numerical approximation of the Boltzmann collision operator)}. To deal with other types of interactions (even 3D Maxwell molecules, say), additional modification of the kernel or parameter fitting is necessary, as was done in \cite{WWSRZ13}. In contrast, our method makes no assumption in the collision kernel and is very easy to implement. Further, we propose to use the spherical design \cite{Womersley} to approximate the integral on the unit sphere, which is the optimal quadrature on the sphere up to date and shows better performance (require much fewer points to attain the same level of accuracy) than the tensor product Gauss quadrature as used in \cite{WZR15}.
+{\bf Related work.} A closely related work is the fast Fourier spectral method introduced in \cite{WZR15} for the generalized Enskog equation (the Boltzmann and Enskog collision operators reduce to the same thing in the spatially homogeneous case). This method is based on a different representation of the collision operator, the so-called Carleman form, and relies on an extra approximation of the integral in the radial direction. As a result, the final computational cost is comparable to our method. However, we point out that the method in \cite{WZR15} only readily works for 2D Maxwell molecules and 3D hard spheres. To deal with other types of interactions (even 3D Maxwell molecules, say), additional modification of the kernel or parameter fitting is necessary, as was done in \cite{WWSRZ13}. In contrast, our method makes no assumption in the collision kernel and is very easy to implement. Further, we propose to use the spherical design \cite{Womersley} to approximate the integral on the unit sphere, which is the optimal quadrature on the sphere up to date and shows better performance (require much fewer points to attain the same level of accuracy) than the tensor product Gauss quadrature as used in \cite{WZR15}.
 
 The rest of the paper is organized as follows: Section 2 provides a brief overview of the inelastic collision operator, and the heated inelastic Boltzmann equation widely used in practice for modeling granular flows. Section 3 presents the details of the fast Fourier spectral method for the inelastic collision operator. In Section 4, we perform a series of numerical tests in both 2D and 3D to validate the accuracy and efficiency of the proposed method. The paper is concluded in Section 5.
 
@@ -288,7 +288,7 @@ where
 \begin{equation}
 v'=v-\frac{1+e}{4}(g-|g|\sigma).
 \end{equation}
-It is then assumed that $f$ has a compact support: $\text{Supp}_v(f) \approx B_S$, where $B_S$ is a ball centered at the origin with radius $S$ (in practice, $S$ can be chosen roughly as  $\max(u_0\pm c\sqrt{T_0})$, where $c$ is some constant around 3). Hence it suffices to truncate the infinite integral in $g$ to a larger ball $B_R$ with radius $R=2S$:
+It is then assumed that $f$ has a compact support: $\text{Supp}_v(f) \approx B_S$, where $B_S$ is a ball centered at the origin with radius $S$ (in practice, the support can be chosen as some multiple of the initial thermal speed $v_{\text{th}}=\sqrt{T_0}$). Hence it suffices to truncate the infinite integral in $g$ to a larger ball $B_R$ with radius $R=2S$:
 \begin{align}  \label{weak}
 \int_{\mathbb{R}^d} Q(f,f)(v)\,\varphi(v)\,\rd{v}&= \int_{\mathbb{R}^d} \int_{B_R} \int_{S^{d-1}} B_{\sigma}(|g|,\sigma\cdot \hat{g})f(v)f(v-g)  \left(\varphi(v')-\varphi(v)\right)\,\rd{\sigma} \rd{g} \rd{v}.
 \end{align}
@@ -296,7 +296,7 @@ Next, we restrict $v$ to a cubic computational domain $D_L=[-L,L]^d$, and approx
 \begin{equation}
 f(v)\approx f_N(v)=\sum_{k=-\frac{N}{2}}^{\frac{N}{2}-1}\hat{f}_k e^{i\frac{\pi}{L}k\cdot v}, \quad \hat{f}_k=\frac{1}{(2L)^d}\int_{D_L}f(v)e^{-i\frac{\pi}{L}k\cdot v}\,\rd{v}.
 \end{equation}
-Note that $k=(k_1,\dots,k_d)$ is a multidimensional index, and $\sum_{k=-N/2}^{N/2-1}:=\sum_{k_1,\dots,k_d=-N/2}^{N/2-1}$. The choice of $L$ can be made similarly as in the classical case $L\geq (3+\sqrt{2})S/2$, see \cite{PR00, FPT05} for more details. Now substituting $f_N$ into (\ref{weak}) and choosing $\varphi(v)=e^{-i\frac{\pi}{L}k\cdot v}$, we can obtain the $k$-th mode of the collision operator as
+Note that $k=(k_1,\dots,k_d)$ is a multidimensional index, and $\sum_{k=-N/2}^{N/2-1}:=\sum_{k_1,\dots,k_d=-N/2}^{N/2-1}$. The choice of $L$ can be made similarly as in the classical case $L\geq (3+\sqrt{2})S/2$, see \cite{PR00} for more details. Now substituting $f_N$ into (\ref{weak}) and choosing $\varphi(v)=e^{-i\frac{\pi}{L}k\cdot v}$, we can obtain the $k$-th mode of the collision operator as
 \begin{align} \label{QQ}
 \hat{Q}_k:&=\frac{1}{(2L)^d}\int_{D_L}Q(f_N,f_N)(v)e^{-i\frac{\pi}{L}k\cdot v}\,\rd{v}\nonumber\\
 &=\frac{1}{(2L)^d}\int_{D_L} \int_{B_R} \int_{S^{d-1}} B_{\sigma}(|g|,\sigma\cdot \hat{g})f_N(v)f_N(v-g)  \left(e^{-i\frac{\pi}{L}k\cdot v'}-e^{-i\frac{\pi}{L}k\cdot v}\right)\,\rd{\sigma} \rd{g} \rd{v}\nonumber\\
@@ -483,7 +483,7 @@ To further test the performance of the ``full" and ``separate" methods, we consi
 \end{equation}
 This function is anisotropic, and $\rho_0=1$, $u_0=0$, $T_0=1.425$.
 
-We choose the same set of parameters as in the previous example and perform the convergence test in $N$. The results are shown in Table~\ref{table 2}. Overall, the accuracy degrades a bit compared to the isotropic solution. Surprisingly, the accuracy of the ``separate" method is much better than the ``full" method when $N$ gets bigger. Although it seems more natural to approximate the gain and loss terms together using the weak formulation, these results suggest that one should use the more accurate formula for the loss term when it is available. Intuitively, the smoothing property of the gain term \textcolor{red}{(see \cite{Lions94} for the classical collision operator and \cite{MM06} for the inelastic case)} alleviates the error introduced by the quadrature; since the loss term does not have this property, the same quadrature can incur more errors, hence a more accurate formula should be used.
+We choose the same set of parameters as in the previous example and perform the convergence test in $N$. The results are shown in Table~\ref{table 2}. Overall, the accuracy degrades a bit compared to the isotropic solution. Surprisingly, the accuracy of the ``separate" method is much better than the ``full" method when $N$ gets bigger. Although it seems more natural to approximate the gain and loss terms together using the weak formulation, these results suggest that one should use the more accurate formula for the loss term when it is available (intuitively, the smoothing property of the gain term \cite{Lions94} alleviates the error introduced by the quadrature; since the loss term does not have this property, the same quadrature can incur more errors, hence a more accurate formula should be used).
 
 \begin{table}[htp!]
   \centering
@@ -535,9 +535,9 @@ We choose the same set of parameters as in the previous example and perform the 
 
 In 3D, the quadrature on the sphere can have a rather nontrivial effect. Therefore, we first test the accuracy of spherical design for Maxwell molecules. Using the same example, we also demonstrate the efficiency of our method by comparing it with the direct Fourier spectral method \cite{FPT05}. After this we numerically verify the physical Haff's cooling law for inelastic hard spheres.
 
-Numerical examples in this subsection are generated using the ``separate" method (the loss term is computed as in equation (\ref{separate3})).
+Numerical examples in this subsection are generated using the ``separate" method (the loss term is computed as in (\ref{separate3}).
 
-\subsubsection{3D inelastic Maxwell molecules \color{red} --- isotropic solution}
+\subsubsection{3D inelastic Maxwell molecules \color{blue} --- isotropic solution}
 
 Consider the constant collision kernel $B_{\sigma} = \frac{1}{4\pi}$ and the initial condition:
 \begin{equation}\label{3Dbkw}
@@ -562,7 +562,7 @@ We perform a convergence test in $M_{\text{sph}}$, the number of spherical desig
     120 & 2.453380453903975e-06 \\
     \bottomrule
   \end{tabu}
-  \caption{Convergence test in $M_{\text{sph}}$ of the 3D Maxwell molecule {\color{red} (isotropic solution)} for $e=0.2$. Errors shown here are $|T_\text{num} - T_\text{ref}|$ at $t_\text{final}=1$. $\Delta t = 0.01$, $N = 32$, $N_{\rho}=30$, $R=7$, $L=7.72$.}
+  \caption{Convergence test in $M_{\text{sph}}$ of the 3D Maxwell molecule {\color{blue} with isotropic initial} for $e=0.2$. Errors shown here are $|T_\text{num} - T_\text{ref}|$ at $t_\text{final}=1$. $\Delta t = 0.01$, $N = 32$, $N_{\rho}=30$, $R=7$, $L=7.72$.}
   \label{table 3}
 \end{table}
 
@@ -581,7 +581,7 @@ We perform a convergence test in $M_{\text{sph}}$, the number of spherical desig
 	  120 & 2.8872928147741922e-08 \\ 
     \bottomrule
   \end{tabu}
-  \caption{Convergence test in $M_{\text{sph}}$ of the 3D Maxwell molecule {\color{red} (isotropic solution)} for $e=0.2$. Errors shown here are $|Q_\text{num} - Q_\text{direct}|_{L^{\infty}}$ at $t_\text{final}=1$. $\Delta t = 0.01$, $N = 32$, $N_{\rho}=30$, $R=7$, $L=7.72$.}
+  \caption{Convergence test in $M_{\text{sph}}$ of the 3D Maxwell molecule {\color{blue} with isotropic initial} for $e=0.2$. Errors shown here are $|Q_\text{num} - Q_\text{direct}|_{L^{\infty}}$ at $t_\text{final}=1$. $\Delta t = 0.01$, $N = 32$, $N_{\rho}=30$, $R=7$, $L=7.72$.}
   \label{table 4}
 \end{table}
 
@@ -599,30 +599,30 @@ To demonstrate the efficiency of our method, we show in Table~\ref{table 5} and 
     64 & -- & 9.7s \\
     \bottomrule
   \end{tabu}
-  	\caption{Average running time per evaluation of the collision operator. Comparison between the direct method and the fast method for various $N$ and fixed $N_{\rho}=30$, $M_{\text{sph}}=32$. {\color{blue} This test is performed using Python (numpy and scipy modules for array operations; pyfftw module (a Python wrapper of FFTW) for computing FFTs) on a $10$ CPUs workstation (Intel(R) Xeon(R) CPU E5-2660 v3 @ 2.60GHz, $8$ threads per FFTW operation).}}
+  	\caption{Average running time per evaluation of the collision operator. Comparison between the direct method and the fast method for various $N$ and fixed $N_{\rho}=30$, $M_{\text{sph}}=32$.}
 	\label{table 5}
  \end{table}
 
 \begin{figure}[htp!]
   \centering
   \includegraphics[width = .8\linewidth]{CPU_time}
-  \caption{Same numbers as in Table~\ref{table 5} plotted in a log-log scale. }
+  \caption{Same numbers as in Table~\ref{table 5} plotted in a log-log scale. {\color{blue} This test is performed using Python (numpy and scipy modules for array operations; pyfftw module (a Python wrapper of FFTW)for computing FFTs) on a $10$ CPUs workstation (Intel(R) Xeon(R) CPU E5-2660 v3 @ 2.60GHz, $8$ threads per FFTW operation.)}}
   \label{CPUtime}
 \end{figure}
 
-{\color{red} \subsubsection{3D inelastic Maxwell molecules  --- anisotropic solution}
+{\color{blue} \subsubsection{3D inelastic Maxwell molecules  --- anisotropic solution}
 
-In previous subsection we performed a convergence test in $M_\text{sph}$ (compared with the direct method and the analytical solution of the temperature) by considering an isotropic solution. This test shows that by using spherical design one can achieve very high accuracy to approximate the integral on the unit sphere, which is a key step in our 3D algorithm. In order to further investigate the performance of spherical design and to illustrate its necessity in the algorithm, an example with anisotropic solution is presented in this subsection.
+In previous subsection we perform a convergence test in $M_\text{sph}$ (compared with direct method and the analytical solution of the macroscopic quantity $T$) using an isotropic solution. This test shows us by using spherical design we can achieve very high accuracy of the integral on the 3D unit sphere surface, which is a key step in our algorithm for 3D case. In order to further investigate the performance of spherical design and to illustrate its necessity in the algorithm, an example with anisotropic initial is presented in this subsection.
 
-For the sake of comparing with isotropic case, this test is done using exactly the same configuration as in previous subsection except the initial condition:
+For the sake of comparing with isotropic case, this test is done use exact the same configuration as in previous subsection except the initial condition:
 \begin{equation}\label{3D_anisotropic}
   f_0(v) = \frac{4}{5\pi^{\frac{3}{2}}}\left(\exp(-\sqrt[3]{16}|v-2|^2) + \exp(-|v+0.5|^2)\right).
 \end{equation}
-The results are given in Table~\ref{3D_T_conv_anisotropic} and Table~\ref{3D_direct_conv_anisotropic}. The error decays with increasing $M_{\text{sph}}$ as expected. However, it is also evident that the accuracy is not as good as in the isotropic case. Despite this result, we consider it as acceptable since the problem itself (numerical approximation of an integral on 3D unit sphere) is highly nontrivial and is an active research field. We believe spherical design is so far among the best methods to deal with such problems.} \textcolor{blue}{We illustrate this statement by performing another test using the standard tensor product based Gauss quadrature, which is also the method used in~\cite{WZR15} for the computation of the integral on 3D unit sphere. The results are shown in Table~\ref{3D_quadrature_conv_anisotropic}. Under roughly the same total number of quadrature points, this method has very bad performance: slow convergence and low accuracy.}
-
+We still set $e=0.2$, $t_\text{final} = 1$, $\Delta t = 0.01$, $N = 32$, and $N_{\rho}=30$ and first use the macroscopic quantity $T$ as our measurement. The results are shown in Table~\ref{3D_T_conv_anisotropic}. We can find both the convergence rate and accuracy are not as good as in isotropic case. It can only achieves an $O(10^{-4})$ error even using $192$ points of spherical design. One can also see this result from Table~\ref{3D_direct_conv_anisotropic} and Table~\ref{table 4}. Despite this result, we consider it as acceptable since the problem itself (numerical approximation of an integral on 3D unit sphere) is highly nontrivial, and we believe spherical design is so far the best method to deal with such problem. We illustrate this statement by performing another test using the standard gauss quadrature method which is also the method used in~\cite{WU201566} for the computation of the integral on 3D unit sphere, shown in Table~\ref{3D_quadrature_conv_anisotropic}. Under roughly the same number of quadrature points on sphere used \big((\# of $\theta$)$\times$(\# of $\phi$)\big), this quadrature method has a very bad performance: slow convergence and low accuracy.
+}
 
 \begin{table}[htpb]
-  \color{red}
+  \color{blue}
   \centering
   \begin{tabu} to 0.8\linewidth {X[1,c] X[2,c]}
     \toprule
@@ -639,13 +639,13 @@ The results are given in Table~\ref{3D_T_conv_anisotropic} and Table~\ref{3D_dir
     192 & 3.96517639616345e-04 \\
     \bottomrule
   \end{tabu}
-  \captionsetup{labelfont={color=red}}
-  \caption{\color{red} Convergence test in $M_{\text{sph}}$ of the 3D Maxwell molecule (anisotropic solution) for $e=0.2$. Errors shown here are $|T_\text{num} - T_\text{ref}|$ at $t_\text{final}=1$. $\Delta t = 0.01$, $N = 32$, $N_{\rho}=30$, $R=7$, $L=7.72$.}
+  \captionsetup{labelfont={color=blue}}
+  \caption{\color{blue} Convergence test in $M_{\text{sph}}$ of the 3D Maxwell molecule with anisotropic initial for $e=0.2$. Errors shown here are $|T_\text{num} - T_\text{ref}|$ at $t_\text{final}=1$. $\Delta t = 0.01$, $N = 32$, $N_{\rho}=30$, $R=7$, $L=7.72$.}
   \label{3D_T_conv_anisotropic}
 \end{table}
 
 \begin{table}[htpb]
-  \color{red}
+  \color{blue}
   \centering
   \begin{tabu} to 0.8\linewidth {X[1,c] X[2,c]}
     \toprule
@@ -662,8 +662,8 @@ The results are given in Table~\ref{3D_T_conv_anisotropic} and Table~\ref{3D_dir
     192 & 3.747408101774895e-05 \\ 
     \bottomrule
   \end{tabu}
-  \captionsetup{labelfont={color=red}}
-  \caption{\color{red} Convergence test in $M_{\text{sph}}$ of the 3D Maxwell molecule (anisotropic solution) for $e=0.2$. Errors shown here are $|Q_\text{num} - Q_\text{direct}|_{L^{\infty}}$ at $t_\text{final}=1$. $\Delta t = 0.01$, $N = 32$, $N_{\rho}=30$, $R=7$, $L=7.72$.}
+  \captionsetup{labelfont={color=blue}}
+  \caption{\color{blue} Convergence test in $M_{\text{sph}}$ of the 3D Maxwell molecule with anisotropic initial for $e=0.2$. Errors shown here are $|Q_\text{num} - Q_\text{direct}|_{L^{\infty}}$ at $t_\text{final}=1$. $\Delta t = 0.01$, $N = 32$, $N_{\rho}=30$, $R=7$, $L=7.72$.}
   \label{3D_direct_conv_anisotropic}
 \end{table}
 
@@ -686,24 +686,24 @@ The results are given in Table~\ref{3D_T_conv_anisotropic} and Table~\ref{3D_dir
     \bottomrule
   \end{tabu}
   \captionsetup{labelfont={color=blue}}
-  \caption{\color{blue} Convergence test of Gauss quadrature of the 3D Maxwell molecule (anisotropic solution) for $e=0.2$. Errors shown here are $|Q_\text{num} - Q_\text{direct}|_{L^{\infty}}$ at $t_\text{final}=1$. $\Delta t = 0.01$, $N = 32$, $N_{\rho}=30$, $R=7$, $L=7.72$.}
+  \caption{\color{blue} Convergence test of gauss quadrature method of the 3D Maxwell molecule with anisotropic solution for $e=0.2$. Errors shown here are $|Q_\text{num} - Q_\text{direct}|_{L^{\infty}}$ at $t_\text{final}=1$. $\Delta t = 0.01$, $N = 32$, $N_{\rho}=30$, $R=7$, $L=7.72$.}
   \label{3D_quadrature_conv_anisotropic}
 \end{table}
 
 
 \subsubsection{3D inelastic hard spheres --- Haff's cooling law}
 
-In this last example, we try to observe the famous Haff's cooling law numerically. First proposed by Haff in 1983 in his seminal work about granular flows \cite{Haff83}, Haff's cooling law implies that the temperature in a spatially homogeneous granular gas composed of inelastic hard spheres decays like $O(t^{-2})$ with time. Note the algebraic decay rather than the exponential decay of Maxwell molecules (cf. equation (\ref{soln:T})).
+In this last example, we try to observe the famous Haff's cooling law numerically. First proposed by Haff in 1983 in his seminal work about granular flows \cite{Haff83}, Haff's cooling law implies that the temperature in a spatially homogeneous granular gas composed of inelastic hard spheres decays like $O(t^{-2})$ with time. Note the algebraic decay rather than the exponential decay of Maxwell molecules (cf. (\ref{soln:T})).
 
-{\color{red} We perform two simulations regarding different initial data: the first one we take the same initial data as in \eqref{3Dbkw}; the second one we consider the following initial data which is a Maxwellian with nonzero bulk velocity:
+{\color{red} We perform two simulations regarding different initial data: The first one we take the same initial data \eqref{3Dbkw} as in the previous example; the second one we use the following initial data which is a Maxwellian with nonzero bulk velocity,
 \begin{equation}\label{3D_maxwellian}
   f_0(v) = \frac{\rho_0}{(2\pi T_0)^{3/2}}e^{-(v - u_0)^2},
 \end{equation}
-where $\rho_0 = 1$, $T_0 = 2$ and $u_0 = (0.5, -0.5, 0)^T$. From~\eqref{conservation} we know $\rho$ and $u$ remain constant in time. Both simulations are performed} for hard sphere molecules, that is, for the collision kernel $B_{\sigma} = \frac{1}{4\pi}|g|$. Also we set $\varepsilon=0$ in equation (\ref{inBoltz}) (the Haff's law is for unheated case, i.e., the homogeneous cooling state). We numerically evaluate the temperature up to time $t_\text{final}=3$ with two different values of restitution coefficient $e=0.2$ and $0.8$. The time evolution of $T$ is shown in Figure~\ref{Haff_cooling} and Figure~\ref{Haff_cooling_maxwellian}, from which one can see that the numerical temperature decays as 
+where $\rho_0 = 1$, $T_0 = 2$ and $u_0 = (0.5, -0.5, 0)^T$. From~\eqref{conservation} we know $rho$ and $u$ with keep unchanged in time. Both simulations are performed} for hard sphere molecules, that is, consider the collision kernel $B_{\sigma} = \frac{1}{4\pi}|g|$. Also we set $\varepsilon=0$ in equation (\ref{inBoltz}) (the Haff's law is for unheated case, i.e., the homogeneous cooling state). We numerically evaluate the temperature up to time $t_\text{final}=3$ with two different values of restitution coefficient $e=0.2$ and $0.8$. The time evolution of $T$ is shown in Figure~\ref{Haff_cooling} and Figure~\ref{Haff_cooling_maxwellian}, from which one can see that the numerical temperature decays as 
 \begin{equation}
-T(t) = \frac{T_0}{(1+\gamma_0 t)^2},
+T(t) = \frac{T_0}{(1+C_0 t)^2},
 \end{equation}
-where the constant $\gamma_0$ {\color{red} depends on the value of $e$ and is estimated by the least squares fitting}. This is in perfect agreement with the Haff's formula (see Section 4.1 of \cite{NE}).
+where the constant $C_0$ {\color{red} depending on the value of $e$ is chosen by using least squares fitting}. This is in perfect agreement of the Haff's formula (see Section 4.1 of \cite{NE}).
 
 \begin{figure}[htp!]
   \centering
@@ -715,8 +715,8 @@ where the constant $\gamma_0$ {\color{red} depends on the value of $e$ and is es
 \begin{figure}[htp!]
   \centering
   \includegraphics[width = .8\linewidth]{Haff_cooling_maxwellian}
-  \captionsetup{labelfont={color=red}}
-  \caption{\color{red} Haff's cooling law {\color{red} with~\eqref{3D_maxwellian} as initial data}. $\Delta t=0.01$, $N=32$, $N_{\rho}=30$, $M_{\text{sph}}=192$, $R=7$, $L=7.72$.}
+  \captionsetup{labelfont={color=blue}}
+  \caption{\color{blue} Haff's cooling law {\color{red} with~\eqref{3D_maxwellian} as initial data}. $\Delta t=0.01$, $N=32$, $N_{\rho}=30$, $M_{\text{sph}}=32$, $R=7$, $L=7.72$.}
   \label{Haff_cooling_maxwellian}
 \end{figure}
 
